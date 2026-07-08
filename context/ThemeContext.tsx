@@ -18,13 +18,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
+    // Deliberately dark-by-default regardless of OS preference: Xverse's
+    // space/universe visuals (starfield, glowing planets, bloom) are a
+    // fixed-dark WebGL scene, not theme-reactive, so auto-switching to
+    // light on prefers-color-scheme would desync the page chrome from
+    // the canvas. Light mode is opt-in only, once a toggle exists.
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
     if (stored === "dark" || stored === "light") {
       setThemeState(stored);
-      return;
     }
-    const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-    setThemeState(prefersLight ? "light" : "dark");
   }, []);
 
   useEffect(() => {
