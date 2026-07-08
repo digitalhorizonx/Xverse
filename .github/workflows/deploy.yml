@@ -30,7 +30,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -42,6 +41,7 @@ jobs:
       packages: write
     outputs:
       tag: ${{ steps.tag.outputs.value }}
+      image_name: ${{ steps.image.outputs.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,6 +53,13 @@ jobs:
           else
             echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           fi
+
+      # GHCR requires a lowercase image name, but github.repository preserves
+      # the repo's actual casing (e.g. "digitalhorizonx/Xverse") — lowercase
+      # it here rather than assume every HorizonX repo is named all-lowercase.
+      - name: Resolve lowercase image name
+        id: image
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -72,8 +79,8 @@ jobs:
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
             NEXT_PUBLIC_ALLOW_INDEXING=${{ vars.NEXT_PUBLIC_ALLOW_INDEXING }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.environment }}-latest
+            ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.tag.outputs.value }}
+            ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ inputs.environment }}-latest
 
   deploy:
     name: Deploy to VPS
