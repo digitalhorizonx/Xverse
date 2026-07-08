@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BRANDS, getBrandBySlug } from "@/data/brands";
 import { getProduct } from "@/data/products";
+import { SiteHeader } from "@/components/nav/SiteHeader";
 import { BrandHero } from "@/components/brand/BrandHero";
 import { BrandStory } from "@/components/brand/BrandStory";
 import { TransformationJourney } from "@/components/brand/TransformationJourney";
@@ -46,6 +47,7 @@ export default function BrandPage({ params }: BrandPageProps) {
 
   return (
     <main id="main-content" className="min-h-screen bg-ink-950">
+      <SiteHeader currentProductId={product.id} />
       <BrandHero brand={brand} product={product} />
       <BrandStory brand={brand} />
       <TransformationJourney brand={brand} />

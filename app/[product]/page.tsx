@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PRODUCTS, getProduct } from "@/data/products";
 import { getBrandsByProduct } from "@/data/brands";
+import { SiteHeader } from "@/components/nav/SiteHeader";
 import { ProductHero } from "@/components/product/ProductHero";
-import { BrandCard } from "@/components/product/BrandCard";
+import { BrandExplorer } from "@/components/product/BrandExplorer";
 import { ComingSoonProduct } from "@/components/product/ComingSoonProduct";
 
 interface ProductPageProps {
@@ -35,6 +36,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main id="main-content" className="min-h-screen bg-ink-950">
+      <SiteHeader currentProductId={product.id} />
       <ProductHero product={product} />
 
       {product.status === "coming-soon" ? (
@@ -47,11 +49,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           {brands.length === 0 ? (
             <p className="text-mist-400">No demo brands are published for {product.name} yet.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {brands.map((brand) => (
-                <BrandCard key={brand.id} brand={brand} />
-              ))}
-            </div>
+            <BrandExplorer brands={brands} productName={product.name} />
           )}
         </section>
       )}
