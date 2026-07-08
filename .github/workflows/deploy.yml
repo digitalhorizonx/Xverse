@@ -61,6 +61,17 @@ jobs:
         id: image
         run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
+      # Temporary diagnostic: the vars context has resolved empty for
+      # NEXT_PUBLIC_SITE_URL/NEXT_PUBLIC_ALLOW_INDEXING in every deploy
+      # attempt so far despite the Environment variables being confirmed
+      # present with no branch restriction — print what this exact job
+      # actually sees, rather than re-guessing from the dashboard.
+      - name: Debug environment vars context
+        run: |
+          echo "environment name resolved to: ${{ inputs.product }}-${{ inputs.environment }}"
+          echo "vars.NEXT_PUBLIC_SITE_URL=[${{ vars.NEXT_PUBLIC_SITE_URL }}]"
+          echo "vars.NEXT_PUBLIC_ALLOW_INDEXING=[${{ vars.NEXT_PUBLIC_ALLOW_INDEXING }}]"
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
