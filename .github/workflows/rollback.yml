@@ -1,0 +1,50 @@
+name: Rollback
+
+# Manual only — never runs on push/PR. See Xability's DEPLOYMENT.md — this
+# workflow is written to be copied into any HorizonX product's repo
+# unchanged.
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "HorizonX product slug (must match a GitHub Environment named <product>-<environment>)"
+        type: string
+        default: xverse
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [staging, production]
+        default: staging
+      image_tag:
+        description: "Tag to roll back to (defaults to the tag running before the last deploy)"
+        type: string
+        required: false
+
+concurrency:
+  group: deploy-${{ inputs.product }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Rollback VPS
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.product }}-${{ inputs.environment }}
+    steps:
+      - name: Roll back over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            ARGS=(--product "${{ inputs.product }}" --environment "${{ inputs.environment }}")
+            if [ -n "${{ inputs.image_tag }}" ]; then
+              ARGS+=(--tag "${{ inputs.image_tag }}")
+            fi
+            /opt/horizonx/shared/deploy/rollback.sh "${ARGS[@]}"
+
+      - name: Verify public health endpoint
+        run: |
+          curl -fsS --max-time 10 --retry 5 --retry-delay 3 \
+            "${{ secrets.HEALTH_URL }}" > /dev/null

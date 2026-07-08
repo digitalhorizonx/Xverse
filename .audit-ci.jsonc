@@ -1,0 +1,32 @@
+{
+  // $schema provides code completion hints to IDEs.
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  // Fail the build on any moderate, high, or critical severity advisory
+  // that isn't explicitly allowlisted below.
+  "moderate": true,
+  "allowlist": [
+    // All of the following trace back to next@14.2.35 — the latest 14.x
+    // release. A full fix requires migrating to Next.js 16, which is a
+    // separate, deliberate breaking-change effort (React 19 upgrade, App
+    // Router API changes) tracked outside this CI setup. None of these
+    // affect us today: we don't use next/image remotePatterns, i18n
+    // routing, rewrites, or middleware, so revisit this list when planning
+    // the Next.js upgrade. Mirrors the allowlist in the Xability repo,
+    // which carries the same dependency.
+    "GHSA-9g9p-9gw9-jx7f", // next: DoS via Image Optimizer remotePatterns (unused)
+    "GHSA-h25m-26qc-wcjf", // next: HTTP request deserialization DoS (RSC)
+    "GHSA-ggv3-7p47-pfv8", // next: HTTP request smuggling in rewrites (unused)
+    "GHSA-3x4c-7xq6-9pq8", // next: unbounded next/image disk cache growth
+    "GHSA-q4gf-8mx6-v5v3", // next: DoS with Server Components
+    "GHSA-8h8q-6873-q5fj", // next: DoS with Server Components
+    "GHSA-3g8h-86w9-wvmq", // next: middleware/proxy redirect cache poisoning (no middleware)
+    "GHSA-ffhc-5mcf-pf4q", // next: XSS in App Router apps using CSP nonces
+    "GHSA-vfv6-92ff-j949", // next: cache poisoning via RSC cache-busting collisions
+    "GHSA-gx5p-jg67-6x7h", // next: XSS in beforeInteractive scripts
+    "GHSA-h64f-5h5j-jqjh", // next: DoS in the Image Optimization API
+    "GHSA-c4j6-fc7j-m34r", // next: SSRF via WebSocket upgrades
+    "GHSA-wfc6-r584-vfw7", // next: cache poisoning in RSC responses
+    "GHSA-36qx-fr4f-26g5", // next: middleware/proxy bypass (Pages Router i18n, unused)
+    "GHSA-qx2v-qp2m-jg93" // postcss bundled inside next's own build tooling
+  ]
+}

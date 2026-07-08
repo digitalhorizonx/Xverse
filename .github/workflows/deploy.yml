@@ -1,0 +1,101 @@
+name: Deploy
+
+# Manual only — this workflow never runs on push/PR. Deployment is a
+# deliberate action, triggered from the Actions tab.
+#
+# This follows the HorizonX deployment standard (see Xability's
+# DEPLOYMENT.md): the `product` input defaults to this repo's product, but
+# the workflow itself is written to be copied into any HorizonX product's
+# repo unchanged.
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "HorizonX product slug (must match a GitHub Environment named <product>-<environment>)"
+        type: string
+        default: xverse
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [staging, production]
+        default: staging
+      image_tag:
+        description: "Tag to build and deploy (defaults to the short commit SHA)"
+        type: string
+        required: false
+
+concurrency:
+  group: deploy-${{ inputs.product }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.product }}-${{ inputs.environment }}
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.tag.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve image tag
+        id: tag
+        run: |
+          if [ -n "${{ inputs.image_tag }}" ]; then
+            echo "value=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_ALLOW_INDEXING=${{ vars.NEXT_PUBLIC_ALLOW_INDEXING }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.environment }}-latest
+
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.product }}-${{ inputs.environment }}
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            /opt/horizonx/shared/deploy/deploy.sh \
+              --product ${{ inputs.product }} \
+              --environment ${{ inputs.environment }} \
+              --tag ${{ needs.build-and-push.outputs.tag }}
+
+      - name: Verify public health endpoint
+        run: |
+          curl -fsS --max-time 10 --retry 5 --retry-delay 3 \
+            "${{ secrets.HEALTH_URL }}" > /dev/null

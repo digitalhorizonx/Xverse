@@ -1,0 +1,25 @@
+# Local development only. Builds the Dockerfile's `dev` stage and
+# bind-mounts the source tree for hot reload — never used in staging/prod.
+#
+# Usage: docker compose -f docker-compose.dev.yml up --build
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: xverse-dev
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    environment:
+      - WATCHPACK_POLLING=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: "no"

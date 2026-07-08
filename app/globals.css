@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+
+  /* Dark theme tokens (default) — space/holographic palette, brand-aligned
+     with Xability's ink/teal/amber/coral scale, extended with a nebula
+     violet accent for the universe visualization. */
+  --color-white: 255 255 255;
+
+  --color-ink-950: 2 3 8;
+  --color-ink-900: 6 8 18;
+  --color-ink-800: 11 15 30;
+  --color-ink-700: 18 24 44;
+  --color-ink-600: 26 34 62;
+  --color-ink-500: 37 47 88;
+
+  --color-mist-500: 118 127 150;
+  --color-mist-400: 137 147 171;
+  --color-mist-300: 170 178 200;
+  --color-mist-200: 201 207 224;
+  --color-mist-100: 231 234 243;
+
+  --color-teal-300: 127 228 214;
+  --color-teal-400: 63 211 189;
+  --color-teal-500: 32 184 164;
+  --color-teal-600: 21 144 133;
+
+  --color-amber-300: 255 217 160;
+  --color-amber-400: 255 183 104;
+  --color-amber-500: 251 150 69;
+  --color-amber-600: 245 121 58;
+
+  --color-coral-400: 255 139 115;
+  --color-coral-500: 249 106 77;
+  --color-coral-600: 225 74 58;
+
+  --color-nebula-300: 196 181 253;
+  --color-nebula-400: 167 139 250;
+  --color-nebula-500: 139 92 246;
+  --color-nebula-600: 109 60 219;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-white: 15 20 32;
+
+  --color-ink-950: 250 251 253;
+  --color-ink-900: 241 243 248;
+  --color-ink-800: 231 234 242;
+  --color-ink-700: 219 223 235;
+  --color-ink-600: 201 206 224;
+  --color-ink-500: 176 183 208;
+
+  --color-mist-500: 105 112 133;
+  --color-mist-400: 100 108 130;
+  --color-mist-300: 71 78 99;
+  --color-mist-200: 40 46 64;
+  --color-mist-100: 15 20 33;
+
+  --color-teal-300: 16 120 108;
+  --color-teal-400: 12 104 94;
+  --color-teal-500: 9 90 81;
+  --color-teal-600: 7 74 67;
+
+  --color-amber-300: 150 95 15;
+  --color-amber-400: 140 85 10;
+  --color-amber-500: 120 72 8;
+  --color-amber-600: 105 62 6;
+
+  --color-coral-400: 180 60 42;
+  --color-coral-500: 165 50 34;
+  --color-coral-600: 145 42 28;
+
+  --color-nebula-300: 91 60 196;
+  --color-nebula-400: 79 51 176;
+  --color-nebula-500: 67 42 156;
+  --color-nebula-600: 55 34 130;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) {
+    color-scheme: light;
+
+    --color-white: 15 20 32;
+
+    --color-ink-950: 250 251 253;
+    --color-ink-900: 241 243 248;
+    --color-ink-800: 231 234 242;
+    --color-ink-700: 219 223 235;
+    --color-ink-600: 201 206 224;
+    --color-ink-500: 176 183 208;
+
+    --color-mist-500: 105 112 133;
+    --color-mist-400: 100 108 130;
+    --color-mist-300: 71 78 99;
+    --color-mist-200: 40 46 64;
+    --color-mist-100: 15 20 33;
+
+    --color-teal-300: 16 120 108;
+    --color-teal-400: 12 104 94;
+    --color-teal-500: 9 90 81;
+    --color-teal-600: 7 74 67;
+
+    --color-amber-300: 150 95 15;
+    --color-amber-400: 140 85 10;
+    --color-amber-500: 120 72 8;
+    --color-amber-600: 105 62 6;
+
+    --color-coral-400: 180 60 42;
+    --color-coral-500: 165 50 34;
+    --color-coral-600: 145 42 28;
+
+    --color-nebula-300: 91 60 196;
+    --color-nebula-400: 79 51 176;
+    --color-nebula-500: 67 42 156;
+    --color-nebula-600: 55 34 130;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: rgb(var(--color-ink-950));
+  color: rgb(var(--color-mist-100));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+::selection {
+  background: rgba(var(--color-nebula-400) / 0.35);
+  color: rgb(var(--color-mist-100));
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/[0.04] backdrop-blur-xl border border-white/10;
+  }
+
+  .glass-strong {
+    @apply bg-ink-800/70 backdrop-blur-2xl border border-white/10;
+  }
+
+  .text-gradient {
+    @apply bg-brand-gradient-text bg-clip-text text-transparent;
+    background-size: 200% auto;
+  }
+
+  .container-px {
+    @apply px-6 sm:px-8 lg:px-12;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-ink-700;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--color-ink-900));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-ink-600));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-ink-500));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-nebula-400));
+    outline-offset: 3px;
+  }
+}
+
+/* prefers-reduced-motion is also checked in JS (see hooks/useReducedMotion)
+   for gating the 3D scene, but this belt-and-suspenders CSS rule covers any
+   Framer Motion / CSS animation that slips through without a JS check. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
