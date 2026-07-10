@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/nav/SiteHeader";
 import { ProductHero } from "@/components/product/ProductHero";
 import { BrandExplorer } from "@/components/product/BrandExplorer";
 import { ComingSoonProduct } from "@/components/product/ComingSoonProduct";
+import { ArrivalOverlay } from "@/components/fx/ArrivalOverlay";
 
 interface ProductPageProps {
   params: { product: string };
@@ -36,6 +37,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main id="main-content" className="min-h-screen bg-ink-950">
+      <ArrivalOverlay />
       <SiteHeader currentProductId={product.id} />
       <ProductHero product={product} />
 
