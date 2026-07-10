@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Universe } from "@/components/universe/Universe";
+import { ParallaxSky } from "@/components/fx/ParallaxSky";
 import { PRODUCTS } from "@/data/products";
 
 const hero = (
@@ -31,17 +32,10 @@ export default function HomePage() {
     // ancestor would silently disable the sticky pinning inside the
     // scroll journey.
     <main id="main-content" className="relative min-h-screen overflow-x-clip bg-ink-950">
-      {/* Viewport-locked sky: the 3D canvas is transparent, so this nebula
-          is the scene's backdrop at every scroll depth. */}
-      <div
-        aria-hidden
-        className="fixed inset-0 bg-cover bg-center opacity-70"
-        style={{ backgroundImage: "url(/images/nebula.webp)" }}
-      />
-      <div
-        aria-hidden
-        className="fixed inset-0 bg-grid-lines bg-[size:64px_64px] opacity-25"
-      />
+      {/* Viewport-locked sky with scroll parallax: the 3D canvas is
+          transparent, so this nebula is the scene's backdrop at every
+          scroll depth — and it drifts against the scroll for depth. */}
+      <ParallaxSky />
 
       <div className="relative">
         {/* The universe IS the landing viewport — the hero floats inside
