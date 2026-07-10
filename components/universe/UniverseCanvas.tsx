@@ -12,10 +12,16 @@ const UniverseScene = dynamic(() => import("./UniverseScene").then((mod) => mod.
   loading: () => <UniverseLoading />,
 });
 
-export function UniverseCanvas({ scrollRef }: { scrollRef?: MutableRefObject<number> }) {
+interface UniverseCanvasProps {
+  scrollRef?: MutableRefObject<number>;
+  playEntry?: boolean;
+  onEntryComplete?: () => void;
+}
+
+export function UniverseCanvas({ scrollRef, playEntry, onEntryComplete }: UniverseCanvasProps) {
   return (
     <div className="h-full min-h-[480px] w-full">
-      <UniverseScene scrollRef={scrollRef} />
+      <UniverseScene scrollRef={scrollRef} playEntry={playEntry} onEntryComplete={onEntryComplete} />
     </div>
   );
 }

@@ -92,8 +92,13 @@ const config: Config = {
         "spin-slower": "spin 40s linear infinite",
         shimmer: "shimmer 2.5s linear infinite",
         twinkle: "twinkle 3.2s ease-in-out infinite",
+        "arrival-fade": "arrivalFade 0.95s ease-out forwards",
       },
       keyframes: {
+        arrivalFade: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
         fadeUp: {
           "0%": { opacity: "0", transform: "translateY(24px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },

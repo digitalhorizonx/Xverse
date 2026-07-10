@@ -14,18 +14,32 @@ import { Planet } from "./Planet";
 import { OrbitRing } from "./OrbitRing";
 import { Starfield } from "./Starfield";
 import { CameraRig } from "./CameraRig";
+import type { RigPhase } from "./CameraRig";
 import { UniverseHUD } from "./UniverseHUD";
+import { WarpStreaks } from "./WarpStreaks";
+import type { WarpFx } from "./WarpStreaks";
+import { ARRIVAL_STORAGE_KEY } from "@/components/fx/ArrivalOverlay";
 
 interface ControlsLike {
   target: Vector3;
   update: () => void;
 }
 
-export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<number> }) {
+interface UniverseSceneProps {
+  scrollRef?: MutableRefObject<number>;
+  /** Play the once-per-session warp-in entry sequence. */
+  playEntry?: boolean;
+  onEntryComplete?: () => void;
+}
+
+export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }: UniverseSceneProps) {
   const router = useRouter();
+  const [phase, setPhase] = useState<RigPhase>(playEntry ? "entry" : "journey");
+  const [flash, setFlash] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [controls, setControls] = useState<ControlsLike | null>(null);
   const planetRefs = useRef<Map<string, Group>>(new Map());
+  const fxRef = useRef<WarpFx>({ intensity: 0 });
 
   const focusedPlanet = useMemo(
     () => PRODUCTS.find((product) => product.id === focusedId) ?? null,
@@ -33,6 +47,7 @@ export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<numb
   );
 
   function handleSelect(id: string) {
+    if (phase !== "journey") return;
     setFocusedId(id);
   }
 
@@ -41,23 +56,46 @@ export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<numb
   }
 
   function handleArrive() {
+    // Live worlds get the hyperspace exit; coming-soon planets just show
+    // their panel while the camera holds orbit alongside them.
     if (focusedPlanet?.status === "live") {
-      router.push(`/${focusedPlanet.id}`);
+      setPhase("warp");
     }
   }
+
+  function handleWarpComplete() {
+    if (!focusedPlanet) return;
+    try {
+      sessionStorage.setItem(ARRIVAL_STORAGE_KEY, focusedPlanet.id);
+    } catch {
+      // Storage can be unavailable (private mode) — the arrival fade is
+      // cosmetic, navigation must happen regardless.
+    }
+    router.push(`/${focusedPlanet.id}`);
+  }
+
+  const status =
+    phase === "entry"
+      ? "ENTERING THE XVERSE"
+      : phase === "warp"
+        ? `WARP JUMP · ${focusedPlanet?.name ?? ""}`
+        : focusedPlanet
+          ? `APPROACHING · ${focusedPlanet.name}`
+          : "IN ORBIT · HORIZONX CORE";
 
   return (
     <div className="relative h-full w-full">
       {/* No opaque clear color: the canvas stays transparent so the nebula
           backdrop behind it becomes the scene's sky. */}
       <Canvas
-        camera={{ position: [0, 11.5, 24], fov: 50 }}
+        camera={{ position: [0, 30, 115], fov: 50 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true }}
       >
         <ambientLight intensity={0.35} />
         <Starfield />
-        <Core showLabel={!focusedId} />
+        <Core showLabel={!focusedId && phase === "journey"} />
+        <WarpStreaks fxRef={fxRef} />
 
         {PRODUCTS.map((planet, index) => (
           <group key={planet.id}>
@@ -76,10 +114,18 @@ export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<numb
         ))}
 
         <CameraRig
+          phase={phase}
           targetGroup={focusedId ? (planetRefs.current.get(focusedId) ?? null) : null}
           active={Boolean(focusedId)}
           controls={controls}
           onArrive={handleArrive}
+          onEntryComplete={() => {
+            setPhase("journey");
+            onEntryComplete?.();
+          }}
+          onWarpFlash={() => setFlash(true)}
+          onWarpComplete={handleWarpComplete}
+          fxRef={fxRef}
           scrollRef={scrollRef}
         />
 
@@ -89,13 +135,13 @@ export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<numb
           // Wheel must scroll the page (the scroll journey IS the zoom);
           // drag still gives a temporary look-around that eases back.
           enableZoom={false}
-          enabled={!focusedId}
+          enabled={!focusedId && phase === "journey"}
           // While traveling to/focused on a planet, the camera sits much
           // closer than the home-view minDistance allows — without
           // relaxing it here, update() clamps the camera back out every
           // frame and fights CameraRig's lerp, so it never arrives.
           minDistance={focusedId ? 1.5 : 5}
-          maxDistance={30}
+          maxDistance={130}
         />
 
         <EffectComposer multisampling={0}>
@@ -104,7 +150,21 @@ export function UniverseScene({ scrollRef }: { scrollRef?: MutableRefObject<numb
         </EffectComposer>
       </Canvas>
 
-      <UniverseHUD focusedPlanet={focusedPlanet} onReturn={handleReturn} />
+      <UniverseHUD
+        focusedPlanet={phase === "warp" ? null : focusedPlanet}
+        status={status}
+        onReturn={handleReturn}
+      />
+
+      {/* Warp white-out: covers the viewport just before navigation; the
+          destination page's ArrivalOverlay picks up from here and fades
+          back in, so the jump reads as one continuous move. */}
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 z-20 bg-gradient-to-br from-white via-cyan-100 to-white transition-opacity duration-300 ${
+          flash ? "opacity-100" : "opacity-0"
+        }`}
+      />
     </div>
   );
 }
