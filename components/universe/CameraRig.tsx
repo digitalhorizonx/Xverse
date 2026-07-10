@@ -2,21 +2,31 @@
 
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Vector3 } from "three";
+import { CatmullRomCurve3, Vector3 } from "three";
 import type { Group, PerspectiveCamera } from "three";
 import type { MutableRefObject } from "react";
 import type { WarpFx } from "./WarpStreaks";
 
 const HOME_TARGET = new Vector3(0, 0, 0);
 
-// Scroll keyframes for the unfocused "journey" camera: a high, distant
-// cinematic overview that dollies down into the orbital plane as the page
-// scrolls. {radius, height} pairs at progress 0 → 0.5 → 1.
-const KEY_START = { radius: 24, height: 11.5 };
-const KEY_MID = { radius: 14, height: 4 };
-const KEY_END = { radius: 8.5, height: 1.3 };
+// The scroll journey is a genuine 3D flight path, not a straight dolly:
+// a spline that starts high above the system, banks right between the
+// outer rings, crosses low over the inner system on the left, and
+// settles at eye level near the core. Scroll progress moves the camera
+// along the curve, so scrolling FEELS like flying through the universe.
+const JOURNEY_PATH = new CatmullRomCurve3(
+  [
+    new Vector3(0, 26, 26),
+    new Vector3(15, 8.5, 13.5),
+    new Vector3(-13, 3.4, 11.5),
+    new Vector3(0, 1.4, 8.4),
+  ],
+  false,
+  "centripetal",
+);
+const JOURNEY_START = JOURNEY_PATH.getPoint(0);
 
-// Warp-in entry: from deep space down to the overview.
+// Warp-in entry: from deep space down to the start of the flight path.
 const ENTRY_FROM = new Vector3(0, 30, 115);
 const ENTRY_DURATION = 3.2;
 const ENTRY_FOV = 74;
@@ -40,20 +50,6 @@ function easeInCubic(t: number) {
   return t ** 3;
 }
 
-function keyframe(progress: number) {
-  if (progress < 0.5) {
-    const t = smoothstep(progress / 0.5);
-    return {
-      radius: KEY_START.radius + (KEY_MID.radius - KEY_START.radius) * t,
-      height: KEY_START.height + (KEY_MID.height - KEY_START.height) * t,
-    };
-  }
-  const t = smoothstep((progress - 0.5) / 0.5);
-  return {
-    radius: KEY_MID.radius + (KEY_END.radius - KEY_MID.radius) * t,
-    height: KEY_MID.height + (KEY_END.height - KEY_MID.height) * t,
-  };
-}
 
 export type RigPhase = "entry" | "journey" | "warp";
 
@@ -132,11 +128,7 @@ export function CameraRig({
     if (phase === "entry") {
       const t = Math.min(phaseT / ENTRY_DURATION, 1);
       const eased = easeOutCubic(t);
-      cam.position.lerpVectors(
-        ENTRY_FROM,
-        desiredCamPos.current.set(0, KEY_START.height, KEY_START.radius),
-        eased,
-      );
+      cam.position.lerpVectors(ENTRY_FROM, JOURNEY_START, eased);
       cam.fov = ENTRY_FOV + (BASE_FOV - ENTRY_FOV) * eased;
       cam.updateProjectionMatrix();
       if (controls) controls.target.copy(HOME_TARGET);
@@ -201,12 +193,11 @@ export function CameraRig({
       }
     } else {
       const progress = scrollRef?.current ?? 0;
-      const { radius, height } = keyframe(progress);
-      // Slow ambient drift plus a scroll-linked sweep, so scrubbing the
-      // page swings the viewpoint around the system rather than only
-      // zooming in a straight line.
-      const theta = state.clock.elapsedTime * 0.04 + progress * 0.9;
-      desiredCamPos.current.set(Math.sin(theta) * radius, height, Math.cos(theta) * radius);
+      // Fly the spline. A gentle time-based bob keeps the frame alive
+      // while the visitor isn't scrolling, without fighting the path.
+      JOURNEY_PATH.getPoint(smoothstep(progress), desiredCamPos.current);
+      desiredCamPos.current.x += Math.sin(state.clock.elapsedTime * 0.35) * 0.5;
+      desiredCamPos.current.y += Math.sin(state.clock.elapsedTime * 0.22) * 0.25;
 
       camera.position.lerp(desiredCamPos.current, lerpFactor);
       if (controls) controls.target.lerp(HOME_TARGET, lerpFactor);

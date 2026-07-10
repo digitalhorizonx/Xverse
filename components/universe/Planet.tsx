@@ -6,6 +6,7 @@ import { Html, Line } from "@react-three/drei";
 import { AdditiveBlending, Color } from "three";
 import type { Group } from "three";
 import type { ProductPlanet } from "@/data/types";
+import { ProductEmblem } from "./ProductEmblem";
 
 interface PlanetProps {
   planet: ProductPlanet;
@@ -64,6 +65,11 @@ export function Planet({ planet, angleOffset, isFocused, onSelect, registerRef }
         position={[planet.orbitRadius, 0, 0]}
         ref={(node) => registerRef(planet.id, node)}
       >
+        {/* Invisible-but-raycastable hit target — generous, stable radius
+            so the emblem's visual scale changes never affect
+            clickability. (A visible={false} mesh would be skipped by the
+            raycaster, so it renders with a fully transparent material
+            instead.) */}
         <mesh
           onClick={(event) => {
             event.stopPropagation();
@@ -78,33 +84,15 @@ export function Planet({ planet, angleOffset, isFocused, onSelect, registerRef }
             setHovered(false);
             document.body.style.cursor = "auto";
           }}
-          scale={hovered || isFocused ? 1.15 : 1}
         >
-          <sphereGeometry args={[0.62, 48, 48]} />
-          <meshStandardMaterial
-            color={planet.color}
-            emissive={planet.color}
-            emissiveIntensity={isLive ? 1.1 : 0.4}
-            roughness={0.35}
-            metalness={0.3}
-            transparent
-            opacity={isLive ? 1 : 0.55}
-          />
+          <sphereGeometry args={[1.25, 16, 16]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
-        {/* Atmosphere halo — a larger additive shell that bloom picks up. */}
-        <mesh scale={hovered || isFocused ? 1.6 : 1.42}>
-          <sphereGeometry args={[0.62, 32, 32]} />
-          <meshBasicMaterial
-            color={planet.accentColor}
-            transparent
-            opacity={isLive ? 0.14 : 0.06}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
+        {/* The product's glowing logo-badge IS the planet. */}
+        <ProductEmblem planet={planet} emphasized={hovered || isFocused} />
 
-        <Html distanceFactor={12} position={[0, -1, 0]} center>
+        <Html distanceFactor={12} position={[0, -1.35, 0]} center>
           <div
             className={`pointer-events-none select-none whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm transition-opacity ${
               hovered || isFocused ? "opacity-100" : "opacity-70"

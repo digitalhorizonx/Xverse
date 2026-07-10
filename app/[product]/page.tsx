@@ -7,6 +7,7 @@ import { ProductHero } from "@/components/product/ProductHero";
 import { BrandExplorer } from "@/components/product/BrandExplorer";
 import { ComingSoonProduct } from "@/components/product/ComingSoonProduct";
 import { ArrivalOverlay } from "@/components/fx/ArrivalOverlay";
+import { WorldShowcaseSection } from "@/components/product/WorldShowcaseSection";
 
 interface ProductPageProps {
   params: { product: string };
@@ -44,9 +45,11 @@ export default function ProductPage({ params }: ProductPageProps) {
       {product.status === "coming-soon" ? (
         <ComingSoonProduct product={product} />
       ) : (
+        <>
+        <WorldShowcaseSection product={product} brands={brands} />
         <section className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
           <h2 className="mb-6 font-display text-xl font-semibold text-mist-100">
-            Demo brand worlds
+            All demo worlds
           </h2>
           {brands.length === 0 ? (
             <p className="text-mist-400">No demo brands are published for {product.name} yet.</p>
@@ -54,6 +57,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             <BrandExplorer brands={brands} productName={product.name} />
           )}
         </section>
+        </>
       )}
     </main>
   );
