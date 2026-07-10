@@ -5,11 +5,10 @@ import type { ProductPlanet } from "@/data/types";
 
 interface UniverseHUDProps {
   focusedPlanet: ProductPlanet | null;
-  isTraveling: boolean;
   onReturn: () => void;
 }
 
-export function UniverseHUD({ focusedPlanet, isTraveling, onReturn }: UniverseHUDProps) {
+export function UniverseHUD({ focusedPlanet, onReturn }: UniverseHUDProps) {
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 sm:p-6">
       <div className="flex items-start justify-between gap-3">
@@ -40,13 +39,9 @@ export function UniverseHUD({ focusedPlanet, isTraveling, onReturn }: UniverseHU
         </div>
       )}
 
-      <p
-        className={`pointer-events-none text-center text-xs text-mist-500 transition-opacity ${
-          focusedPlanet || isTraveling ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        Click a planet to explore · Drag to look around · Scroll to zoom
-      </p>
+      {/* Bottom hint lives in Universe's journey overlay (it knows scroll
+          state); keep the flex slot so the top row stays pinned. */}
+      <span aria-hidden />
     </div>
   );
 }

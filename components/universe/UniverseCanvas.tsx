@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { MutableRefObject } from "react";
 import { UniverseLoading } from "./UniverseLoading";
 
 // The 3D scene pulls in three.js + postprocessing — sizable, client-only
@@ -11,10 +12,10 @@ const UniverseScene = dynamic(() => import("./UniverseScene").then((mod) => mod.
   loading: () => <UniverseLoading />,
 });
 
-export function UniverseCanvas() {
+export function UniverseCanvas({ scrollRef }: { scrollRef?: MutableRefObject<number> }) {
   return (
-    <div className="h-[70vh] min-h-[480px] w-full sm:h-[80vh]">
-      <UniverseScene />
+    <div className="h-full min-h-[480px] w-full">
+      <UniverseScene scrollRef={scrollRef} />
     </div>
   );
 }
