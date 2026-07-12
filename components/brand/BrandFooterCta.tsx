@@ -15,12 +15,20 @@ export function BrandFooterCta({ brand, product }: { brand: Brand; product: Prod
         <p className="mx-auto mt-3 max-w-xl text-mist-400">
           Ready to start your own digital transformation journey?
         </p>
-        <Link
-          href={product.ctaUrl}
-          className="mt-6 inline-flex items-center justify-center rounded-full bg-brand-gradient px-8 py-3.5 text-sm font-semibold text-ink-950 transition hover:opacity-90"
-        >
-          {product.ctaLabel}
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href={product.ctaUrl}
+            className="inline-flex items-center justify-center rounded-full bg-brand-gradient px-8 py-3.5 text-sm font-semibold text-ink-950 transition hover:opacity-90"
+          >
+            {product.ctaLabel}
+          </Link>
+          <Link
+            href={`/showcase/${product.showcaseSlug}`}
+            className="glass inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-mist-200 transition hover:text-white"
+          >
+            Back to the {product.name} showcase
+          </Link>
+        </div>
       </div>
     </section>
   );

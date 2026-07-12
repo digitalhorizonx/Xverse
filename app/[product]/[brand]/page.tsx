@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { BRANDS, getBrandBySlug } from "@/data/brands";
 import { getProduct } from "@/data/products";
 import { SiteHeader } from "@/components/nav/SiteHeader";
+import { Breadcrumbs } from "@/components/showcase/Breadcrumbs";
+import { ArrivalOverlay } from "@/components/fx/ArrivalOverlay";
 import { BrandHero } from "@/components/brand/BrandHero";
 import { BrandStory } from "@/components/brand/BrandStory";
 import { TransformationJourney } from "@/components/brand/TransformationJourney";
@@ -47,7 +49,18 @@ export default function BrandPage({ params }: BrandPageProps) {
 
   return (
     <main id="main-content" className="min-h-screen bg-ink-950">
+      <ArrivalOverlay />
       <SiteHeader currentProductId={product.id} />
+      <div className="mx-auto max-w-6xl px-6 pt-5 sm:px-8">
+        <Breadcrumbs
+          crumbs={[
+            { label: "Universe", href: "/" },
+            { label: "Showcase", href: "/showcase" },
+            { label: product.name, href: `/showcase/${product.showcaseSlug}` },
+            { label: brand.name },
+          ]}
+        />
+      </div>
       <BrandHero brand={brand} product={product} />
       <BrandStory brand={brand} />
       <TransformationJourney brand={brand} />

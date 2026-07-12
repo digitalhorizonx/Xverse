@@ -10,7 +10,7 @@ export function ProductSwitcher({ currentProductId }: { currentProductId?: strin
         return (
           <Link
             key={product.id}
-            href={`/${product.id}`}
+            href={`/showcase/${product.showcaseSlug}`}
             aria-current={isCurrent ? "page" : undefined}
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition",

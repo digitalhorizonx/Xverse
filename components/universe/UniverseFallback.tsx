@@ -23,7 +23,7 @@ export function UniverseFallback() {
           const card = (
             <div
               className={`glass-strong flex h-full flex-col gap-2 rounded-3xl p-6 transition ${
-                isLive ? "hover:border-white/20" : "opacity-60"
+                "hover:border-white/20"
               }`}
               style={{ boxShadow: isLive ? `0 0 0 1px ${product.color}33` : undefined }}
             >
@@ -40,12 +40,10 @@ export function UniverseFallback() {
             </div>
           );
 
-          return isLive ? (
-            <Link key={product.id} href={`/${product.id}`} className="block">
+          return (
+            <Link key={product.id} href={`/showcase/${product.showcaseSlug}`} className="block">
               {card}
             </Link>
-          ) : (
-            <div key={product.id}>{card}</div>
           );
         })}
       </div>

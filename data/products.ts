@@ -3,6 +3,7 @@ import type { ProductPlanet } from "./types";
 export const PRODUCTS: ProductPlanet[] = [
   {
     id: "xability",
+    showcaseSlug: "xability",
     name: "Xability",
     tagline: "AI Social Media Operations",
     description:
@@ -17,6 +18,7 @@ export const PRODUCTS: ProductPlanet[] = [
   },
   {
     id: "xsite",
+    showcaseSlug: "xsite",
     name: "XSites",
     tagline: "AI-built websites",
     description:
@@ -31,6 +33,7 @@ export const PRODUCTS: ProductPlanet[] = [
   },
   {
     id: "xapp",
+    showcaseSlug: "xapps",
     name: "XApps",
     tagline: "AI-built apps",
     description:
@@ -45,6 +48,7 @@ export const PRODUCTS: ProductPlanet[] = [
   },
   {
     id: "xai",
+    showcaseSlug: "ai",
     name: "XAI",
     tagline: "AI workflows & agents",
     description:
@@ -59,6 +63,7 @@ export const PRODUCTS: ProductPlanet[] = [
   },
   {
     id: "xauto",
+    showcaseSlug: "xauto",
     name: "XAuto",
     tagline: "Business process automation",
     description:
@@ -75,4 +80,8 @@ export const PRODUCTS: ProductPlanet[] = [
 
 export function getProduct(id: string) {
   return PRODUCTS.find((product) => product.id === id);
+}
+
+export function getProductByShowcaseSlug(slug: string) {
+  return PRODUCTS.find((product) => product.showcaseSlug === slug);
 }
