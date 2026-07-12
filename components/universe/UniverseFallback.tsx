@@ -16,6 +16,8 @@ export function UniverseFallback() {
 
   return (
     <div className="relative flex min-h-[70vh] flex-col items-center justify-center gap-10 px-5 py-16 sm:px-6">
+      {/* Keeps h1 → h2 → h3 order intact for the card headings below. */}
+      <h2 className="sr-only">{dict.home.universeLabel}</h2>
       <div className="glass flex flex-col items-center gap-2 rounded-3xl px-8 py-6 text-center">
         <span className="text-xs uppercase tracking-[0.3em] text-nebula-400">{dict.hud.core}</span>
         <p className="max-w-sm text-sm text-mist-400">{dict.home.fallbackNote}</p>

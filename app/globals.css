@@ -21,8 +21,10 @@
   --color-ink-600: 26 34 62;
   --color-ink-500: 37 47 88;
 
-  --color-mist-500: 118 127 150;
-  --color-mist-400: 137 147 171;
+  /* mist-500 tuned for WCAG AA small-text contrast on glass card fills,
+     not only the raw page background. */
+  --color-mist-500: 132 141 164;
+  --color-mist-400: 148 157 180;
   --color-mist-300: 170 178 200;
   --color-mist-200: 201 207 224;
   --color-mist-100: 231 234 243;
@@ -59,27 +61,29 @@
   --color-ink-600: 201 206 224;
   --color-ink-500: 176 183 208;
 
-  --color-mist-500: 105 112 133;
-  --color-mist-400: 100 108 130;
+  /* Dark enough for AA small text on the light glass fills, with 400 a
+     step stronger than 500 to preserve the emphasis hierarchy. */
+  --color-mist-500: 92 99 120;
+  --color-mist-400: 82 90 112;
   --color-mist-300: 71 78 99;
   --color-mist-200: 40 46 64;
   --color-mist-100: 15 20 33;
 
-  --color-teal-300: 16 120 108;
+  --color-teal-300: 10 95 85;
   --color-teal-400: 12 104 94;
   --color-teal-500: 9 90 81;
   --color-teal-600: 7 74 67;
 
-  --color-amber-300: 150 95 15;
+  --color-amber-300: 122 76 10;
   --color-amber-400: 140 85 10;
   --color-amber-500: 120 72 8;
   --color-amber-600: 105 62 6;
 
-  --color-coral-400: 180 60 42;
+  --color-coral-400: 152 42 28;
   --color-coral-500: 165 50 34;
   --color-coral-600: 145 42 28;
 
-  --color-nebula-300: 91 60 196;
+  --color-nebula-300: 63 38 148;
   --color-nebula-400: 79 51 176;
   --color-nebula-500: 67 42 156;
   --color-nebula-600: 55 34 130;
@@ -98,27 +102,27 @@
     --color-ink-600: 201 206 224;
     --color-ink-500: 176 183 208;
 
-    --color-mist-500: 105 112 133;
-    --color-mist-400: 100 108 130;
+    --color-mist-500: 92 99 120;
+    --color-mist-400: 82 90 112;
     --color-mist-300: 71 78 99;
     --color-mist-200: 40 46 64;
     --color-mist-100: 15 20 33;
 
-    --color-teal-300: 16 120 108;
+    --color-teal-300: 10 95 85;
     --color-teal-400: 12 104 94;
     --color-teal-500: 9 90 81;
     --color-teal-600: 7 74 67;
 
-    --color-amber-300: 150 95 15;
+    --color-amber-300: 122 76 10;
     --color-amber-400: 140 85 10;
     --color-amber-500: 120 72 8;
     --color-amber-600: 105 62 6;
 
-    --color-coral-400: 180 60 42;
+    --color-coral-400: 152 42 28;
     --color-coral-500: 165 50 34;
     --color-coral-600: 145 42 28;
 
-    --color-nebula-300: 91 60 196;
+    --color-nebula-300: 63 38 148;
     --color-nebula-400: 79 51 176;
     --color-nebula-500: 67 42 156;
     --color-nebula-600: 55 34 130;
@@ -149,6 +153,17 @@
 }
 :root[data-theme="light"] .sky-grid {
   opacity: 0.35;
+}
+
+/* Product accent colors are pastel glows tuned for dark space; on light
+   surfaces small accent text switches to a dark saturated variant. Both
+   values are computed where the accent is known (see lib/color.ts +
+   SectionHeading) — this only picks per theme. */
+.eyebrow-accent {
+  color: var(--accent);
+}
+:root[data-theme="light"] .eyebrow-accent {
+  color: var(--accent-dark, var(--accent));
 }
 
 /* Directional icons follow the reading direction: arrows and chevrons that

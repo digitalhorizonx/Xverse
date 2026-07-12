@@ -83,6 +83,12 @@ function XabilitySections({ product, showcase }: SectionProps) {
   return (
     <>
       <section id="worlds" className="scroll-mt-28 pt-6">
+        {/* Always-present h2 for this section: the 3D worlds block below
+            (which carries the visible h2) unmounts on low-capability /
+            reduced-motion clients, and heading order must survive that. */}
+        <h2 className="sr-only">
+          {showcase.sections.find((section) => section.id === "worlds")?.label ?? product.name}
+        </h2>
         <WorldShowcaseSection product={product} brands={brands} />
         <div className="mx-auto max-w-6xl px-5 pt-12 sm:px-8">
           <BrandExplorer brands={brands} productName={product.name} />

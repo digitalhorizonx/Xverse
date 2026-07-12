@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Moon, Sun, Monitor, Smartphone } from "lucide-react";
 import { BrowserFrame } from "../frames";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { onAccent } from "@/lib/color";
 import type { SiteTemplate } from "@/data/types";
 
 /**
@@ -50,7 +51,9 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
               style={t.id === template.id ? { backgroundColor: `${t.palette.primary}33`, boxShadow: `inset 0 0 0 1px ${t.palette.primary}66` } : undefined}
             >
               {t.businessName}
-              <span className="ms-1.5 text-[10px] uppercase tracking-wide opacity-60">{kindLabels[t.kind]}</span>
+              {/* Own color tier, not opacity — translucent text can't
+                  hold AA contrast. */}
+              <span className="ms-1.5 text-[10px] uppercase tracking-wide text-mist-500">{kindLabels[t.kind]}</span>
             </button>
           ))}
         </div>
@@ -97,7 +100,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
               )}
               <span
                 className="rounded-full px-3 py-1.5 text-[10px] font-semibold"
-                style={{ backgroundColor: template.palette.primary, color: "#fff" }}
+                style={{ backgroundColor: template.palette.primary, color: onAccent(template.palette.primary) }}
               >
                 {template.heroCta}
               </span>
@@ -113,7 +116,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
               </p>
               <span
                 className="mt-5 inline-block rounded-full px-5 py-2 text-xs font-semibold"
-                style={{ backgroundColor: template.palette.primary, color: "#fff" }}
+                style={{ backgroundColor: template.palette.primary, color: onAccent(template.palette.primary) }}
               >
                 {template.heroCta}
               </span>

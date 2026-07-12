@@ -90,7 +90,7 @@ export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; age
               if (done) setVisibleCount(0);
               setPlaying(true);
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-xs font-semibold text-[#fff] transition hover:opacity-90"
+            className="flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-xs font-semibold text-[#12080a] transition hover:opacity-90"
             style={{ backgroundColor: accent }}
           >
             {done ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : <Play className="h-3.5 w-3.5" aria-hidden />}
@@ -170,7 +170,7 @@ export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWo
           <button
             type="button"
             onClick={() => setProgress(1)}
-            className="rounded-full px-4 py-2 text-xs font-semibold text-[#fff] transition hover:opacity-90"
+            className="rounded-full px-4 py-2 text-xs font-semibold text-[#12080a] transition hover:opacity-90"
             style={{ backgroundColor: accent }}
           >
             {finished ? labels.runAgain : progress > 0 ? labels.running : labels.run}
@@ -194,18 +194,20 @@ export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWo
                   {step}
                 </span>
                 {index < workflow.steps.length - 1 && (
-                  <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-mist-600 sm:mx-auto sm:mt-1 sm:block" aria-hidden />
+                  <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-mist-500 sm:mx-auto sm:mt-1 sm:block" aria-hidden />
                 )}
               </li>
             );
           })}
         </ol>
 
+        {/* Dimmed via color tier, not opacity — half-transparent text
+            can't hold AA contrast on any background. */}
         <p
           className={`mt-5 rounded-2xl px-4 py-3 text-center text-xs font-medium transition-all duration-500 ${
-            finished ? "opacity-100" : "opacity-40"
+            finished ? "text-mist-100" : "text-mist-500"
           }`}
-          style={{ backgroundColor: `${accent}1c`, color: finished ? "#fff" : undefined }}
+          style={{ backgroundColor: `${accent}1c` }}
         >
           {workflow.outcome}
         </p>

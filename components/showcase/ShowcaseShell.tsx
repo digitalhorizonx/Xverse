@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getPrimaryCtas } from "@/lib/cta";
 import { getDict } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
+import { onAccent } from "@/lib/color";
 import type { ProductPlanet, ProductShowcase } from "@/data/types";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { SectionNav } from "./SectionNav";
@@ -149,8 +150,8 @@ export function SampleBusinessesSection({ product, showcase, sectionId = "exampl
             >
               <div className="flex items-center justify-between">
                 <span
-                  className="flex h-10 w-10 items-center justify-center rounded-2xl font-display text-sm font-bold text-[#fff]"
-                  style={{ backgroundColor: business.color }}
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl font-display text-sm font-bold"
+                  style={{ backgroundColor: business.color, color: onAccent(business.color) }}
                 >
                   {business.logoMark}
                 </span>

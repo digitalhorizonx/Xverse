@@ -7,10 +7,11 @@ import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { fmt } from "@/lib/i18n/config";
 import type { AutoService, VehicleListing } from "@/data/types";
 
+// Theme tokens, not fixed hex — the chips re-tune for light mode.
 const STATUS_CLASSES: Record<VehicleListing["status"], string> = {
-  available: "bg-[#20b8a4]/15 text-[#7fe4d6]",
+  available: "bg-teal-500/15 text-teal-300",
   reserved: "bg-white/10 text-mist-400",
-  "in-inspection": "bg-[#fb9645]/15 text-[#ffd9a0]",
+  "in-inspection": "bg-amber-500/15 text-amber-300",
 };
 
 /**

@@ -20,11 +20,13 @@ interface HistoryEntry {
   time: string;
 }
 
+// Theme tokens, not fixed hex: these chips must re-tune themselves for
+// light mode like every other surface.
 const STATUS_CLASSES: Record<RequestStatus, string> = {
   "in-review": "bg-white/10 text-mist-300",
-  approved: "bg-[#20b8a4]/15 text-[#7fe4d6]",
-  rejected: "bg-[#f96a4d]/15 text-[#ff8b73]",
-  published: "bg-[#8b5cf6]/20 text-[#c4b5fd]",
+  approved: "bg-teal-500/15 text-teal-300",
+  rejected: "bg-coral-500/15 text-coral-400",
+  published: "bg-nebula-500/20 text-nebula-300",
 };
 
 /**
@@ -98,7 +100,7 @@ export function PortalSimulator({ accent }: { accent: string }) {
               type="button"
               onClick={submitRequest}
               disabled={credits <= 0}
-              className="flex min-h-[40px] items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-[#fff] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex min-h-[40px] items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-[#081210] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               style={{ backgroundColor: accent }}
             >
               <Send className="h-3.5 w-3.5" aria-hidden /> {t.newRequest}
@@ -121,17 +123,17 @@ export function PortalSimulator({ accent }: { accent: string }) {
 
               {request.status === "in-review" && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setStatus(request.id, "approved")} className="flex min-h-[36px] items-center gap-1 rounded-full bg-[#20b8a4]/15 px-3 py-1.5 text-[11px] font-medium text-[#7fe4d6] transition hover:bg-[#20b8a4]/25">
+                  <button type="button" onClick={() => setStatus(request.id, "approved")} className="flex min-h-[36px] items-center gap-1 rounded-full bg-teal-500/15 px-3 py-1.5 text-[11px] font-medium text-teal-300 transition hover:bg-teal-500/25">
                     <ThumbsUp className="h-3 w-3" aria-hidden /> {t.approve}
                   </button>
-                  <button type="button" onClick={() => setStatus(request.id, "rejected")} className="flex min-h-[36px] items-center gap-1 rounded-full bg-[#f96a4d]/15 px-3 py-1.5 text-[11px] font-medium text-[#ff8b73] transition hover:bg-[#f96a4d]/25">
+                  <button type="button" onClick={() => setStatus(request.id, "rejected")} className="flex min-h-[36px] items-center gap-1 rounded-full bg-coral-500/15 px-3 py-1.5 text-[11px] font-medium text-coral-400 transition hover:bg-coral-500/25">
                     <ThumbsDown className="h-3 w-3" aria-hidden /> {t.reject}
                   </button>
                 </div>
               )}
               {request.status === "approved" && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setStatus(request.id, "published")} className="flex min-h-[36px] items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#fff] transition hover:opacity-90" style={{ backgroundColor: accent }}>
+                  <button type="button" onClick={() => setStatus(request.id, "published")} className="flex min-h-[36px] items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#081210] transition hover:opacity-90" style={{ backgroundColor: accent }}>
                     <CheckCircle2 className="h-3 w-3" aria-hidden /> {t.publish}
                   </button>
                   <button type="button" onClick={() => setStatus(request.id, "in-review")} className="flex min-h-[36px] items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium text-mist-300 transition hover:bg-white/15">
@@ -163,7 +165,7 @@ export function PortalSimulator({ accent }: { accent: string }) {
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: accent }} aria-hidden />
                 <span>
                   <span className="block leading-relaxed text-mist-300">{entry.text}</span>
-                  <span className="text-[10px] text-mist-600">{entry.time}</span>
+                  <span className="text-[10px] text-mist-500">{entry.time}</span>
                 </span>
               </li>
             ))}

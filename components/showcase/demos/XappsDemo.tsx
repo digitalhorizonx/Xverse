@@ -5,6 +5,7 @@ import { Bell, WifiOff } from "lucide-react";
 import { PhoneFrame } from "../frames";
 import { ShowcaseIcon } from "../icons";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { onAccent } from "@/lib/color";
 import type { AppDemo } from "@/data/types";
 
 /**
@@ -54,7 +55,7 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
             style={demo.id === app.id ? { backgroundColor: `${demo.color}33`, boxShadow: `inset 0 0 0 1px ${demo.color}66` } : undefined}
           >
             {demo.businessName}
-            <span className="ms-1.5 text-[10px] uppercase tracking-wide opacity-60">{demo.category}</span>
+            <span className="ms-1.5 text-[10px] uppercase tracking-wide text-mist-500">{demo.category}</span>
           </button>
         ))}
       </div>
@@ -72,7 +73,7 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
                 }`}
               >
                 <div className="glass-strong flex items-start gap-2.5 rounded-2xl p-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-display text-[10px] font-bold text-[#fff]" style={{ backgroundColor: app.color }}>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-display text-[10px] font-bold" style={{ backgroundColor: app.color, color: onAccent(app.color) }}>
                     {app.businessName.slice(0, 2).toUpperCase()}
                   </span>
                   <span>
@@ -91,7 +92,8 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
 
               {/* Screen content */}
               <div className={`flex-1 overflow-hidden px-4 pt-3 transition ${offline ? "opacity-75 saturate-50" : ""}`}>
-                <h4 className="font-display text-base font-semibold text-mist-100">{screen.title}</h4>
+                {/* Sample-app UI, not page structure — no heading role. */}
+                <p className="font-display text-base font-semibold text-mist-100">{screen.title}</p>
                 <ul className="mt-3 flex flex-col gap-2">
                   {screen.items.map((item) => (
                     <li key={item.primary} className="flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3">
@@ -108,8 +110,8 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
                 </ul>
                 {screen.cta && (
                   <span
-                    className="mt-3 block rounded-full py-2.5 text-center text-xs font-semibold text-[#fff]"
-                    style={{ backgroundColor: app.color }}
+                    className="mt-3 block rounded-full py-2.5 text-center text-xs font-semibold"
+                    style={{ backgroundColor: app.color, color: onAccent(app.color) }}
                   >
                     {screen.cta}
                   </span>
@@ -125,10 +127,13 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
                     role="tab"
                     aria-selected={s.id === screen.id}
                     onClick={() => setScreenId(s.id)}
-                    className={`flex-1 py-3 text-[10px] font-medium transition ${
-                      s.id === screen.id ? "text-white" : "text-mist-500 hover:text-mist-300"
+                    // Active state: full-contrast label + a colored
+                    // indicator bar — accent-colored TEXT can't hold AA on
+                    // the light theme's phone surface.
+                    className={`flex-1 border-t-2 py-3 text-[10px] font-medium transition ${
+                      s.id === screen.id ? "font-semibold text-mist-100" : "border-transparent text-mist-500 hover:text-mist-300"
                     }`}
-                    style={s.id === screen.id ? { color: app.color } : undefined}
+                    style={s.id === screen.id ? { borderTopColor: app.color } : undefined}
                   >
                     {s.label}
                   </button>

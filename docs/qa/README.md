@@ -49,3 +49,34 @@ passed** locally against the dev server:
 6. `prefers-reduced-motion` renders the 2D fallback with no canvas.
 7. Mobile hero: primary CTA above the fold at 390×844 and hero block
    strictly above the canvas.
+
+## Planet → showcase mapping
+
+`scripts/qa-planets.mjs` clicks each of the five planets in the real 3D
+scene (via the canvas raycaster) and asserts the warp lands on the correct
+showcase URL — **5/5 verified**. This test caught a real arrival bug: the
+camera chased orbiting planets with an exponential lerp whose steady-state
+lag exceeded the arrival threshold, so the warp never fired. Fixed by
+freezing a focused planet's orbit and widening the threshold.
+
+## Lighthouse (production build, mobile emulation)
+
+| Route | Perf | A11y | Best Practices | SEO |
+| --- | --- | --- | --- | --- |
+| `/` | 91 | **100** | **100** | 66* |
+| `/showcase` | 78–81 | **100** | **100** | 69* |
+| `/showcase/xability` | 88 | **100** | **100** | 69* |
+| `/showcase/xsite` | 89 | **100** | **100** | 69* |
+| `/showcase/xapps` | 87 | **100** | **100** | 69* |
+| `/showcase/xauto` | 87 | **100** | **100** | 69* |
+| `/showcase/ai` | 88 | **100** | **100** | 69* |
+
+\* SEO loses points only for `is-crawlable`: the local build ran with
+`NEXT_PUBLIC_ALLOW_INDEXING=false` (deliberate noindex). Production reads
+the repo variable.
+
+Accessibility reached 100 through real fixes, audited in the light theme
+(Lighthouse's default): AA-tuned light `mist`/accent token values,
+`onAccent()` white-or-black selection for text on brand-colored fills,
+per-theme eyebrow accent colors (`lib/color.ts` `darkAccent`), no
+opacity-dimmed text, and heading-order guards for the gated 3D sections.

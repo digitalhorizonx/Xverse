@@ -44,6 +44,11 @@ export function Planet({ planet, angleOffset, isFocused, onSelect, registerRef }
 
   useFrame((state, delta) => {
     if (!orbitRef.current) return;
+    // Hold still while focused: the camera chases this planet with an
+    // exponential lerp, and a moving target keeps the chase lag above the
+    // arrival threshold forever — the warp would never fire. Freezing the
+    // destination also reads better: you approach a planet, not a chase.
+    if (isFocused) return;
     const speed = 0.06 * planet.orbitSpeed;
     orbitRef.current.rotation.y += delta * speed;
     void state;

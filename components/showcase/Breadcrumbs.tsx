@@ -30,7 +30,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
                 {crumb.label}
               </span>
             )}
-            {!isLast && <ChevronRight className="h-3 w-3 text-mist-600" aria-hidden />}
+            {!isLast && <ChevronRight className="h-3 w-3 text-mist-500" aria-hidden />}
           </span>
         );
       })}
