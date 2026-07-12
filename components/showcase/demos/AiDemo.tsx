@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Bot, Play, RotateCcw, User, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { AiAgentProfile, AutomationWorkflow, ChatTurn } from "@/data/types";
 
 /**
@@ -9,6 +10,8 @@ import type { AiAgentProfile, AutomationWorkflow, ChatTurn } from "@/data/types"
  * typing indicator, replayable. Feels like watching the product work.
  */
 export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; agents: AiAgentProfile[]; accent: string }) {
+  const { dict } = useLocale();
+  const labels = dict.demos.ai;
   const [visibleCount, setVisibleCount] = useState(0);
   const [playing, setPlaying] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
@@ -37,10 +40,10 @@ export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; age
             <Bot className="h-4 w-4" style={{ color: accent }} aria-hidden />
           </span>
           <span>
-            <span className="block text-sm font-semibold text-mist-100">Keystone Assurance — Claims Agent</span>
+            <span className="block text-sm font-semibold text-mist-100">{labels.chatHeader}</span>
             <span className="flex items-center gap-1.5 text-[10px] text-mist-500">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ backgroundColor: accent }} aria-hidden />
-              Online · responds instantly
+              {labels.online}
             </span>
           </span>
         </div>
@@ -76,7 +79,7 @@ export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; age
             </div>
           )}
           {visibleCount === 0 && !playing && (
-            <p className="pt-24 text-center text-xs text-mist-500">Press play to watch the agent handle a real claim.</p>
+            <p className="pt-24 text-center text-xs text-mist-500">{labels.pressPlay}</p>
           )}
         </div>
 
@@ -91,7 +94,7 @@ export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; age
             style={{ backgroundColor: accent }}
           >
             {done ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : <Play className="h-3.5 w-3.5" aria-hidden />}
-            {done ? "Replay conversation" : playing ? "Playing…" : "Play conversation"}
+            {done ? labels.replay : playing ? labels.playing : labels.play}
           </button>
         </div>
       </div>
@@ -119,6 +122,8 @@ export function AiChatDemo({ script, agents, accent }: { script: ChatTurn[]; age
 
 /** Trigger → steps → outcome, traced step by step on click. */
 export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWorkflow[]; accent: string }) {
+  const { dict } = useLocale();
+  const labels = dict.demos.ai;
   const [activeId, setActiveId] = useState(workflows[0]?.id);
   const [progress, setProgress] = useState(0);
   const workflow = workflows.find((w) => w.id === activeId) ?? workflows[0];
@@ -138,7 +143,7 @@ export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWo
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Automation workflows">
+      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label={labels.workflowsAria}>
         {workflows.map((w) => (
           <button
             key={w.id}
@@ -160,7 +165,7 @@ export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWo
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-xs text-mist-400">
             <Zap className="h-4 w-4" style={{ color: accent }} aria-hidden />
-            Trigger: <span className="text-mist-200">{workflow.trigger}</span>
+            {labels.trigger} <span className="text-mist-200">{workflow.trigger}</span>
           </p>
           <button
             type="button"
@@ -168,7 +173,7 @@ export function AiWorkflowsDemo({ workflows, accent }: { workflows: AutomationWo
             className="rounded-full px-4 py-2 text-xs font-semibold text-[#fff] transition hover:opacity-90"
             style={{ backgroundColor: accent }}
           >
-            {finished ? "Run again" : progress > 0 ? "Running…" : "Run workflow"}
+            {finished ? labels.runAgain : progress > 0 ? labels.running : labels.run}
           </button>
         </div>
 

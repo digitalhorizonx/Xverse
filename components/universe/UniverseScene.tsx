@@ -9,6 +9,8 @@ import type { Group } from "three";
 import type { Vector3 } from "three";
 import type { MutableRefObject } from "react";
 import { PRODUCTS } from "@/data/products";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { fmt } from "@/lib/i18n/config";
 import { Core } from "./Core";
 import { Planet } from "./Planet";
 import { OrbitRing } from "./OrbitRing";
@@ -34,7 +36,18 @@ interface UniverseSceneProps {
 
 export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }: UniverseSceneProps) {
   const router = useRouter();
+  const { dict } = useLocale();
   const [phase, setPhase] = useState<RigPhase>(playEntry ? "entry" : "journey");
+  // Perf tier, decided once: phones and low-core devices skip the
+  // post-processing chain, run fewer stars, and cap the pixel ratio.
+  // (This component is client-only via next/dynamic, so matchMedia is
+  // available during the first render.)
+  const [lite] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.matchMedia("(max-width: 767px)").matches ||
+        (navigator.hardwareConcurrency ?? 8) < 6),
+  );
   const [flash, setFlash] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [controls, setControls] = useState<ControlsLike | null>(null);
@@ -74,12 +87,12 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
 
   const status =
     phase === "entry"
-      ? "ENTERING THE XVERSE"
+      ? dict.hud.entering
       : phase === "warp"
-        ? `WARP JUMP · ${focusedPlanet?.name ?? ""}`
+        ? fmt(dict.hud.warpJump, { name: focusedPlanet?.name ?? "" })
         : focusedPlanet
-          ? `APPROACHING · ${focusedPlanet.name}`
-          : "IN ORBIT · HORIZONX CORE";
+          ? fmt(dict.hud.approaching, { name: focusedPlanet.name })
+          : dict.hud.inOrbit;
 
   return (
     <div className="relative h-full w-full">
@@ -87,11 +100,11 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
           backdrop behind it becomes the scene's sky. */}
       <Canvas
         camera={{ position: [0, 30, 115], fov: 50 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={lite ? [1, 1.5] : [1, 1.75]}
+        gl={{ antialias: !lite, alpha: true }}
       >
         <ambientLight intensity={0.35} />
-        <Starfield />
+        <Starfield count={lite ? 1400 : 4000} />
         <Core showLabel={!focusedId && phase === "journey"} />
         <WarpStreaks fxRef={fxRef} />
 
@@ -142,10 +155,14 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
           maxDistance={130}
         />
 
-        <EffectComposer multisampling={0}>
-          <Bloom intensity={0.9} luminanceThreshold={0.18} luminanceSmoothing={0.9} mipmapBlur />
-          <Vignette eskil={false} offset={0.18} darkness={0.78} />
-        </EffectComposer>
+        {/* Bloom + vignette are the single most expensive part of the
+            frame — desktop-class GPUs only. */}
+        {!lite && (
+          <EffectComposer multisampling={0}>
+            <Bloom intensity={0.9} luminanceThreshold={0.18} luminanceSmoothing={0.9} mipmapBlur />
+            <Vignette eskil={false} offset={0.18} darkness={0.78} />
+          </EffectComposer>
+        )}
       </Canvas>
 
       <UniverseHUD

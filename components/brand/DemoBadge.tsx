@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 interface DemoBadgeProps {
   label?: string;
@@ -10,7 +13,9 @@ interface DemoBadgeProps {
  * customer data, and the UI should never let a visitor mistake it for
  * one. See data/brands.ts for the full policy note.
  */
-export function DemoBadge({ label = "Demo Brand · Sample Experience", className }: DemoBadgeProps) {
+export function DemoBadge({ label, className }: DemoBadgeProps) {
+  const { dict } = useLocale();
+
   return (
     <span
       className={cn(
@@ -19,7 +24,7 @@ export function DemoBadge({ label = "Demo Brand · Sample Experience", className
       )}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-      {label}
+      {label ?? dict.brandWorlds.demoBadge}
     </span>
   );
 }

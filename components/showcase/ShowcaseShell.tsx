@@ -5,7 +5,9 @@ import { ArrivalOverlay } from "@/components/fx/ArrivalOverlay";
 import { Reveal } from "@/components/fx/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PRIMARY_CTAS } from "@/lib/cta";
+import { getPrimaryCtas } from "@/lib/cta";
+import { getDict } from "@/lib/i18n/server";
+import { fmt } from "@/lib/i18n/config";
 import type { ProductPlanet, ProductShowcase } from "@/data/types";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { SectionNav } from "./SectionNav";
@@ -14,6 +16,7 @@ import { CTAFooter } from "./CTAFooter";
 import { ShowcaseIcon } from "./icons";
 
 interface ShowcaseShellProps {
+  /** Already localized (see lib/i18n/localize.ts). */
   product: ProductPlanet;
   showcase: ProductShowcase;
   children: ReactNode;
@@ -26,6 +29,7 @@ interface ShowcaseShellProps {
  * block. One shell = one consistent experience across all products.
  */
 export function ShowcaseShell({ product, showcase, children }: ShowcaseShellProps) {
+  const { dict } = getDict();
   const isLive = product.status === "live";
 
   return (
@@ -33,11 +37,11 @@ export function ShowcaseShell({ product, showcase, children }: ShowcaseShellProp
       <ArrivalOverlay />
       <SiteHeader currentProductId={product.id} />
 
-      <div className="mx-auto max-w-6xl px-6 pt-5 sm:px-8">
+      <div className="mx-auto max-w-6xl px-5 pt-5 sm:px-8">
         <Breadcrumbs
           crumbs={[
-            { label: "Universe", href: "/" },
-            { label: "Showcase", href: "/showcase" },
+            { label: dict.breadcrumbs.universe, href: "/" },
+            { label: dict.breadcrumbs.showcase, href: "/showcase" },
             { label: product.name },
           ]}
         />
@@ -50,30 +54,30 @@ export function ShowcaseShell({ product, showcase, children }: ShowcaseShellProp
           className="pointer-events-none absolute inset-0"
           style={{ background: `radial-gradient(60% 55% at 50% 0%, ${product.color}1f, transparent 70%)` }}
         />
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 pb-14 pt-12 text-center sm:px-8 sm:pt-16">
-          <EmblemImage planet={product} size={112} />
-          <div className="flex items-center gap-3">
-            <h1 className="font-display text-4xl font-semibold text-mist-100 sm:text-5xl">{product.name}</h1>
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-5 px-5 pb-14 pt-10 text-center sm:gap-6 sm:px-8 sm:pt-16">
+          <EmblemImage planet={product} size={96} className="sm:h-[112px] sm:w-[112px]" />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <h1 className="font-display text-3xl font-semibold text-mist-100 sm:text-5xl">{product.name}</h1>
             <span
               className={`rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] ${
                 isLive ? "bg-white/10 text-mist-200" : "bg-white/5 text-mist-400"
               }`}
             >
-              {isLive ? "Live" : "Coming Soon — Preview"}
+              {isLive ? dict.common.live : dict.common.comingSoonPreview}
             </span>
           </div>
-          <p className="font-display text-xl text-mist-200 sm:text-2xl">{showcase.heroTagline}</p>
-          <p className="max-w-2xl text-balance text-mist-400">{showcase.heroDescription}</p>
+          <p className="font-display text-lg text-mist-200 sm:text-2xl">{showcase.heroTagline}</p>
+          <p className="max-w-2xl text-balance text-sm text-mist-400 sm:text-base">{showcase.heroDescription}</p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-            {PRIMARY_CTAS.map((cta, index) => (
+          <div className="flex w-full flex-col items-stretch justify-center gap-3 pt-1 min-[400px]:w-auto min-[400px]:flex-row min-[400px]:items-center">
+            {getPrimaryCtas(dict).map((cta, index) => (
               <ButtonLink key={cta.label} href={cta.href} external={cta.external} variant={index === 0 ? "primary" : "secondary"}>
                 {cta.label} <ArrowRight className="h-4 w-4" aria-hidden />
               </ButtonLink>
             ))}
           </div>
 
-          <dl className="mt-6 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
+          <dl className="mt-4 grid w-full max-w-3xl grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-4">
             {showcase.stats.map((stat) => (
               <div key={stat.label} className="glass rounded-2xl px-4 py-4">
                 <dt className="text-[10px] font-medium uppercase tracking-wider text-mist-500">{stat.label}</dt>
@@ -95,16 +99,18 @@ export function ShowcaseShell({ product, showcase, children }: ShowcaseShellProp
 
 /** Shared "What You Get" capability grid, styled identically everywhere. */
 export function CapabilitiesSection({ product, showcase }: { product: ProductPlanet; showcase: ProductShowcase }) {
+  const { dict } = getDict();
+
   return (
-    <section id="capabilities" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+    <section id="capabilities" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
       <SectionHeading
-        eyebrow="What You Get"
-        title={`Everything ${product.name} delivers`}
+        eyebrow={dict.showcase.whatYouGet}
+        title={fmt(dict.showcase.capabilitiesTitle, { product: product.name })}
         accentColor={product.accentColor}
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {showcase.capabilities.map((capability, index) => (
-          <Reveal key={capability.title} delay={index * 60}>
+          <Reveal key={capability.icon + capability.title} delay={index * 60}>
             <div className="glass-strong flex h-full flex-col gap-3 rounded-3xl p-6 transition hover:border-white/20">
               <span
                 className="flex h-10 w-10 items-center justify-center rounded-2xl"
@@ -124,12 +130,14 @@ export function CapabilitiesSection({ product, showcase }: { product: ProductPla
 
 /** Shared realistic example-business strip. */
 export function SampleBusinessesSection({ product, showcase, sectionId = "examples" }: { product: ProductPlanet; showcase: ProductShowcase; sectionId?: string }) {
+  const { dict } = getDict();
+
   return (
-    <section id={sectionId} className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+    <section id={sectionId} className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
       <SectionHeading
-        eyebrow="Example Businesses"
-        title="How real businesses use it"
-        description="Fictional demo businesses, realistic transformations — this is the shape of what we deliver."
+        eyebrow={dict.showcase.examplesEyebrow}
+        title={dict.showcase.examplesTitle}
+        description={dict.showcase.examplesBody}
         accentColor={product.accentColor}
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -147,7 +155,7 @@ export function SampleBusinessesSection({ product, showcase, sectionId = "exampl
                   {business.logoMark}
                 </span>
                 <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-mist-300">
-                  Demo Business
+                  {dict.common.demoBusiness}
                 </span>
               </div>
               <div>
@@ -166,6 +174,9 @@ export function SampleBusinessesSection({ product, showcase, sectionId = "exampl
           </Reveal>
         ))}
       </div>
+
+      {/* Trust framing: demo data is always labeled as demo data. */}
+      <p className="mt-8 text-center text-[11px] text-mist-500">{dict.common.demoDataNote}</p>
     </section>
   );
 }

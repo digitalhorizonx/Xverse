@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import type { Brand } from "@/data/types";
 import { DemoBadge } from "@/components/brand/DemoBadge";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function BrandCard({ brand }: { brand: Brand }) {
+  const { dict } = useLocale();
+
   return (
     <Link
       href={`/${brand.product}/${brand.slug}`}
@@ -17,7 +22,7 @@ export function BrandCard({ brand }: { brand: Brand }) {
         >
           {brand.logoMark}
         </div>
-        <DemoBadge label="Demo" />
+        <DemoBadge label={dict.brandWorlds.demoShort} />
       </div>
 
       <div>
@@ -30,7 +35,7 @@ export function BrandCard({ brand }: { brand: Brand }) {
       <p className="text-sm text-mist-400">{brand.description}</p>
 
       <div className="mt-auto flex items-center justify-between text-xs text-mist-500">
-        <span>Transformation score</span>
+        <span>{dict.brandWorlds.transformationScore}</span>
         <span className="font-medium text-mist-300">{brand.digitalTransformationScore}%</span>
       </div>
     </Link>

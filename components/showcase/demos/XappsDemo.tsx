@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Bell, WifiOff } from "lucide-react";
 import { PhoneFrame } from "../frames";
 import { ShowcaseIcon } from "../icons";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { AppDemo } from "@/data/types";
 
 /**
@@ -12,6 +13,8 @@ import type { AppDemo } from "@/data/types";
  * platform capabilities demonstrated as interactions, not bullet points.
  */
 export function XappsDemo({ demos }: { demos: AppDemo[] }) {
+  const { dict } = useLocale();
+  const labels = dict.demos.xapps;
   const [activeAppId, setActiveAppId] = useState(demos[0]?.id);
   const app = demos.find((d) => d.id === activeAppId) ?? demos[0];
 
@@ -37,7 +40,7 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* App switcher */}
-      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="App demos">
+      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label={labels.appsAria}>
         {demos.map((demo) => (
           <button
             key={demo.id}
@@ -82,7 +85,7 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
               {/* Offline banner */}
               {offline && (
                 <div className="flex items-center justify-center gap-1.5 bg-white/5 py-1.5 text-[10px] font-medium text-mist-400">
-                  <WifiOff className="h-3 w-3" aria-hidden /> Offline — showing cached data
+                  <WifiOff className="h-3 w-3" aria-hidden /> {labels.offlineBanner}
                 </div>
               )}
 
@@ -114,7 +117,7 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
               </div>
 
               {/* Tab bar */}
-              <div className="flex border-t border-white/5 bg-white/[0.02]" role="tablist" aria-label="App screens">
+              <div className="flex border-t border-white/5 bg-white/[0.02]" role="tablist" aria-label={labels.screensAria}>
                 {app.screens.map((s) => (
                   <button
                     key={s.id}
@@ -140,36 +143,33 @@ export function XappsDemo({ demos }: { demos: AppDemo[] }) {
           <button
             type="button"
             onClick={() => setShowPush(true)}
-            className="glass-strong flex items-start gap-3 rounded-3xl p-5 text-left transition hover:border-white/25"
+            className="glass-strong flex items-start gap-3 rounded-3xl p-5 text-start transition hover:border-white/25"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: `${app.color}22` }}>
               <Bell className="h-5 w-5" style={{ color: app.color }} aria-hidden />
             </span>
             <span>
-              <span className="block font-display text-sm font-semibold text-mist-100">Send a push notification</span>
-              <span className="block text-xs text-mist-400">Behavior-driven messaging, delivered to the lock screen.</span>
+              <span className="block font-display text-sm font-semibold text-mist-100">{labels.sendPushTitle}</span>
+              <span className="block text-xs text-mist-400">{labels.sendPushBody}</span>
             </span>
           </button>
           <button
             type="button"
             onClick={() => setOffline((v) => !v)}
             aria-pressed={offline}
-            className="glass-strong flex items-start gap-3 rounded-3xl p-5 text-left transition hover:border-white/25"
+            className="glass-strong flex items-start gap-3 rounded-3xl p-5 text-start transition hover:border-white/25"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: `${app.color}22` }}>
               <WifiOff className="h-5 w-5" style={{ color: app.color }} aria-hidden />
             </span>
             <span>
               <span className="block font-display text-sm font-semibold text-mist-100">
-                {offline ? "Back online" : "Go offline"}
+                {offline ? labels.backOnline : labels.goOffline}
               </span>
-              <span className="block text-xs text-mist-400">The app keeps working from cache when the network drops.</span>
+              <span className="block text-xs text-mist-400">{labels.offlineNote}</span>
             </span>
           </button>
-          <p className="px-2 text-[11px] leading-relaxed text-mist-500">
-            Every demo is a real interaction — screens, tabs, notifications, and offline behavior are
-            the same building blocks your app ships with, including App Store and Google Play delivery.
-          </p>
+          <p className="px-2 text-[11px] leading-relaxed text-mist-500">{labels.footnote}</p>
         </div>
       </div>
     </div>

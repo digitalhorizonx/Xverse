@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Moon, Sun, Monitor, Smartphone } from "lucide-react";
 import { BrowserFrame } from "../frames";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { SiteTemplate } from "@/data/types";
 
 /**
@@ -11,6 +12,14 @@ import type { SiteTemplate } from "@/data/types";
  * responsive delivery interactively rather than with screenshots.
  */
 export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
+  const { dict } = useLocale();
+  const labels = dict.demos.xsite;
+  const kindLabels: Record<SiteTemplate["kind"], string> = {
+    business: labels.kindBusiness,
+    corporate: labels.kindCorporate,
+    ecommerce: labels.kindEcommerce,
+    landing: labels.kindLanding,
+  };
   const [activeId, setActiveId] = useState(templates[0]?.id);
   const [dark, setDark] = useState(true);
   const [mobile, setMobile] = useState(false);
@@ -27,7 +36,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
     <div className="flex flex-col gap-5">
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Website templates">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label={labels.templatesAria}>
           {templates.map((t) => (
             <button
               key={t.id}
@@ -41,7 +50,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
               style={t.id === template.id ? { backgroundColor: `${t.palette.primary}33`, boxShadow: `inset 0 0 0 1px ${t.palette.primary}66` } : undefined}
             >
               {t.businessName}
-              <span className="ms-1.5 text-[10px] uppercase tracking-wide opacity-60">{t.kind}</span>
+              <span className="ms-1.5 text-[10px] uppercase tracking-wide opacity-60">{kindLabels[t.kind]}</span>
             </button>
           ))}
         </div>
@@ -53,7 +62,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
             className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium text-mist-300 transition hover:text-white"
           >
             {dark ? <Sun className="h-3.5 w-3.5" aria-hidden /> : <Moon className="h-3.5 w-3.5" aria-hidden />}
-            {dark ? "Light mode" : "Dark mode"}
+            {dark ? labels.lightMode : labels.darkMode}
           </button>
           <button
             type="button"
@@ -62,7 +71,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
             className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium text-mist-300 transition hover:text-white"
           >
             {mobile ? <Monitor className="h-3.5 w-3.5" aria-hidden /> : <Smartphone className="h-3.5 w-3.5" aria-hidden />}
-            {mobile ? "Desktop" : "Mobile"}
+            {mobile ? labels.desktop : labels.mobile}
           </button>
         </div>
       </div>
@@ -117,7 +126,7 @@ export function XsiteDemo({ templates }: { templates: SiteTemplate[] }) {
                   <div className="mb-2 h-8 w-8 rounded-lg" style={{ backgroundColor: `${template.palette.primary}33` }} aria-hidden />
                   <p className="text-[11px] font-semibold">{section}</p>
                   <p className="mt-1 text-[10px] leading-relaxed" style={{ color: subtext }}>
-                    Fully managed via the CMS.
+                    {labels.cmsNote}
                   </p>
                 </div>
               ))}

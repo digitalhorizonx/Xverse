@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* .scene-dark re-applies the dark token set to a subtree: the 3D universe
+   viewport stays a dark window into space in BOTH themes, so HUD text,
+   hints, and the floating hero always render light-on-dark inside it. */
+:root,
+.scene-dark {
   color-scheme: dark;
 
   /* Dark theme tokens (default) — space/holographic palette, brand-aligned
@@ -119,6 +123,42 @@
     --color-nebula-500: 67 42 156;
     --color-nebula-600: 55 34 130;
   }
+}
+
+/* The universe viewport's own backdrop. Transparent in dark mode (the
+   page-wide nebula shows through the transparent canvas); in light mode it
+   becomes the deliberate "window into space" — a dark pane framed by light
+   chrome. */
+:root[data-theme="light"] .universe-window {
+  background:
+    radial-gradient(80% 60% at 50% 40%, rgba(60, 40, 140, 0.35), transparent 70%),
+    #05060f;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Theme treatment for the fixed parallax sky: full nebula in dark, a faint
+   texture wash over the light surface in light mode. */
+.sky-nebula {
+  opacity: 0.7;
+}
+.sky-grid {
+  opacity: 0.25;
+}
+:root[data-theme="light"] .sky-nebula {
+  opacity: 0.08;
+}
+:root[data-theme="light"] .sky-grid {
+  opacity: 0.35;
+}
+
+/* Directional icons follow the reading direction: arrows and chevrons that
+   mean "forward/back" must point the other way in RTL. lucide-react stamps
+   these kebab-case classes on every icon. */
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-chevron-left {
+  transform: scaleX(-1);
 }
 
 html {

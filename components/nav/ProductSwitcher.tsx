@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { PRODUCTS } from "@/data/products";
+import { getDict } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
 export function ProductSwitcher({ currentProductId }: { currentProductId?: string }) {
+  const { dict } = getDict();
+
   return (
-    <nav aria-label="Product filter" className="flex flex-wrap items-center gap-2">
+    <nav aria-label={dict.header.productNav} className="flex flex-wrap items-center gap-2">
       {PRODUCTS.map((product) => {
         const isCurrent = product.id === currentProductId;
         return (
@@ -22,7 +25,7 @@ export function ProductSwitcher({ currentProductId }: { currentProductId?: strin
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: product.color }} aria-hidden />
             {product.name}
             {product.status === "coming-soon" && (
-              <span className="text-[10px] uppercase tracking-wide text-mist-500">soon</span>
+              <span className="text-[10px] uppercase tracking-wide text-mist-500">{dict.common.soon}</span>
             )}
           </Link>
         );

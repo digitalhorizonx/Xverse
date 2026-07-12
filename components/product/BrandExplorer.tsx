@@ -5,8 +5,11 @@ import { Search } from "lucide-react";
 import type { Brand } from "@/data/types";
 import { BrandCard } from "./BrandCard";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { fmt } from "@/lib/i18n/config";
 
 export function BrandExplorer({ brands, productName }: { brands: Brand[]; productName: string }) {
+  const { dict } = useLocale();
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState<string | null>(null);
 
@@ -37,13 +40,13 @@ export function BrandExplorer({ brands, productName }: { brands: Brand[]; produc
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={`Search ${productName} demo brands…`}
-            aria-label="Search demo brands"
+            placeholder={fmt(dict.brandWorlds.searchPlaceholder, { product: productName })}
+            aria-label={dict.brandWorlds.searchLabel}
             className="glass w-full rounded-full py-2.5 ps-10 pe-4 text-sm text-mist-100 placeholder:text-mist-500 focus:outline-none focus:ring-2 focus:ring-nebula-400/50"
           />
         </div>
 
-        <nav aria-label="Industry filter" className="flex flex-wrap gap-2">
+        <nav aria-label={dict.brandWorlds.industryFilter} className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setIndustry(null)}
@@ -54,7 +57,7 @@ export function BrandExplorer({ brands, productName }: { brands: Brand[]; produc
                 : "border-white/10 bg-white/[0.03] text-mist-400 hover:text-mist-200",
             )}
           >
-            All industries
+            {dict.brandWorlds.allIndustries}
           </button>
           {industries.map((option) => (
             <button
@@ -76,8 +79,8 @@ export function BrandExplorer({ brands, productName }: { brands: Brand[]; produc
 
       {filtered.length === 0 ? (
         <div className="glass-strong rounded-3xl p-10 text-center">
-          <p className="text-mist-300">No demo brands match your search.</p>
-          <p className="mt-1 text-sm text-mist-500">Try a different term or clear the industry filter.</p>
+          <p className="text-mist-300">{dict.brandWorlds.noResults}</p>
+          <p className="mt-1 text-sm text-mist-500">{dict.brandWorlds.noResultsHint}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
