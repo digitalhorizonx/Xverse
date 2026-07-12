@@ -46,15 +46,8 @@ export function UniverseHUD({ focusedPlanet, status, onReturn }: UniverseHUDProp
         )}
       </div>
 
-      {focusedPlanet && focusedPlanet.status === "coming-soon" && (
-        <div className="glass-strong pointer-events-auto mx-auto flex max-w-sm flex-col items-center gap-3 rounded-3xl p-6 text-center">
-          <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-mist-300">
-            Coming Soon
-          </span>
-          <h3 className="font-display text-xl font-semibold text-mist-100">{focusedPlanet.name}</h3>
-          <p className="text-sm text-mist-400">{focusedPlanet.description}</p>
-        </div>
-      )}
+      {/* Every planet — live or coming soon — warps into its showcase on
+          arrival, so no interruption panel is needed mid-journey. */}
 
       {/* Cockpit status readout — bottom-left, clear of the scroll hint. */}
       <div className="flex items-end justify-start ps-1 sm:ps-3" aria-live="polite">

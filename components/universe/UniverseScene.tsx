@@ -56,11 +56,9 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
   }
 
   function handleArrive() {
-    // Live worlds get the hyperspace exit; coming-soon planets just show
-    // their panel while the camera holds orbit alongside them.
-    if (focusedPlanet?.status === "live") {
-      setPhase("warp");
-    }
+    // Every planet now leads somewhere: live or coming-soon, arrival
+    // triggers the hyperspace exit into that product's showcase.
+    setPhase("warp");
   }
 
   function handleWarpComplete() {
@@ -71,7 +69,7 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
       // Storage can be unavailable (private mode) — the arrival fade is
       // cosmetic, navigation must happen regardless.
     }
-    router.push(`/${focusedPlanet.id}`);
+    router.push(`/showcase/${focusedPlanet.showcaseSlug}`);
   }
 
   const status =

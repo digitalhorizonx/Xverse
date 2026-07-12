@@ -62,7 +62,7 @@ export default function HomePage() {
               const card = (
                 <div
                   className={`glass-strong group flex h-full flex-col gap-3 rounded-3xl p-6 transition ${
-                    isLive ? "hover:-translate-y-1 hover:border-white/20" : "opacity-70"
+                    "hover:-translate-y-1 hover:border-white/20"
                   }`}
                   style={{ boxShadow: `0 0 0 1px ${product.color}2e, 0 0 48px -18px ${product.color}55` }}
                 >
@@ -84,20 +84,16 @@ export default function HomePage() {
                   <h3 className="font-display text-xl font-semibold text-mist-100">{product.name}</h3>
                   <p className="text-sm font-medium text-mist-300">{product.tagline}</p>
                   <p className="text-sm text-mist-500">{product.description}</p>
-                  {isLive && (
-                    <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium text-mist-200 transition group-hover:gap-2.5">
-                      Explore the world <ArrowRight className="h-4 w-4" aria-hidden />
-                    </span>
-                  )}
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium text-mist-200 transition group-hover:gap-2.5">
+                    Enter showcase <ArrowRight className="h-4 w-4" aria-hidden />
+                  </span>
                 </div>
               );
 
-              return isLive ? (
-                <Link key={product.id} href={`/${product.id}`} className="block">
+              return (
+                <Link key={product.id} href={`/showcase/${product.showcaseSlug}`} className="block">
                   {card}
                 </Link>
-              ) : (
-                <div key={product.id}>{card}</div>
               );
             })}
           </div>
@@ -119,10 +115,10 @@ export default function HomePage() {
               Start with Xability <ArrowRight className="h-4 w-4" aria-hidden />
             </a>
             <Link
-              href="/xability"
+              href="/showcase"
               className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-mist-200 transition hover:text-white"
             >
-              Explore demo worlds
+              Explore all showcases
             </Link>
           </div>
         </section>
