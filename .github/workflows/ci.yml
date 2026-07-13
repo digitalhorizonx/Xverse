@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # All PRs, not only PRs into main: V2 ships as stacked phase PRs
+  # (phase N targets phase N-1's branch) and every phase must pass CI.
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
