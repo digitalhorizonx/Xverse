@@ -16,3 +16,10 @@ coverage
 .deployed_tag*
 .last_good_tag*
 .deploy.*.lock
+
+# Local SQLite database (runtime state, never committed)
+.data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

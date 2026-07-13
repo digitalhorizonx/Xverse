@@ -27,6 +27,10 @@
     "GHSA-c4j6-fc7j-m34r", // next: SSRF via WebSocket upgrades
     "GHSA-wfc6-r584-vfw7", // next: cache poisoning in RSC responses
     "GHSA-36qx-fr4f-26g5", // next: middleware/proxy bypass (Pages Router i18n, unused)
-    "GHSA-qx2v-qp2m-jg93" // postcss bundled inside next's own build tooling
+    "GHSA-qx2v-qp2m-jg93", // postcss bundled inside next's own build tooling
+    // drizzle-kit (devDependency, migration generation only — never ships
+    // or runs in production) bundles an old esbuild whose dev server can
+    // be probed cross-origin. We never run drizzle-kit's dev server.
+    "GHSA-67mh-4wv8-2f99" // esbuild dev-server CORS, via drizzle-kit only
   ]
 }

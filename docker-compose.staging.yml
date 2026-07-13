@@ -13,6 +13,10 @@ services:
       - /tmp
     env_file:
       - .env.staging
+    volumes:
+      # The only writable surface besides /tmp: SQLite database + uploaded
+      # media. Backed up nightly by deploy/backup.sh (docs/v2-operations.md).
+      - xverse-data:/data
     ports:
       # Bound to localhost only — nginx on the host is the public entry point.
       - "127.0.0.1:${APP_PORT:-3000}:3000"
@@ -27,3 +31,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  # Named volume: survives container replacement across deploys.
+  xverse-data:
