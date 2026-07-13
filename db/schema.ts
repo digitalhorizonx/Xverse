@@ -87,5 +87,149 @@ export const auditLog = sqliteTable(
   }),
 );
 
+// ---------------------------------------------------------------------------
+// Phase 3: content model. Bilingual-first (explicit En/Ar columns for the
+// mandatory short fields), with zod-validated JSON "blocks" for the rich
+// structured payloads (stats, capabilities, demos…) — see lib/content/blocks.ts.
+
+export const SHOWCASE_TYPES = ["demo-brand", "verified-client", "concept", "template"] as const;
+export type ShowcaseType = (typeof SHOWCASE_TYPES)[number];
+
+export const CONTENT_STATUSES = ["draft", "in_review", "approved", "published", "archived"] as const;
+export type ContentStatus = (typeof CONTENT_STATUSES)[number];
+
+export const cmsProducts = sqliteTable(
+  "cms_products",
+  {
+    /** Stable product id, e.g. "xability" — matches V1 data ids. */
+    id: text("id").primaryKey(),
+    /** Latin brand name (not localized by policy). */
+    name: text("name").notNull(),
+    showcaseSlug: text("showcase_slug").notNull(),
+    taglineEn: text("tagline_en").notNull(),
+    taglineAr: text("tagline_ar").notNull(),
+    descriptionEn: text("description_en").notNull(),
+    descriptionAr: text("description_ar").notNull(),
+    color: text("color").notNull(),
+    accentColor: text("accent_color").notNull(),
+    live: integer("live", { mode: "boolean" }).notNull().default(false),
+    ctaLabelEn: text("cta_label_en").notNull(),
+    ctaLabelAr: text("cta_label_ar").notNull(),
+    ctaUrl: text("cta_url").notNull(),
+    orbitRadius: integer("orbit_radius").notNull(),
+    /** Stored ×100 (SQLite integer): 0.82 → 82. */
+    orbitSpeedPct: integer("orbit_speed_pct").notNull(),
+    order: integer("sort_order").notNull().default(0),
+    active: integer("active", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+    updatedBy: text("updated_by"),
+  },
+  (table) => ({
+    slugUnique: uniqueIndex("cms_products_slug_unique").on(table.showcaseSlug),
+  }),
+);
+
+export const industries = sqliteTable(
+  "industries",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    nameEn: text("name_en").notNull(),
+    nameAr: text("name_ar").notNull(),
+    order: integer("sort_order").notNull().default(0),
+    active: integer("active", { mode: "boolean" }).notNull().default(true),
+  },
+  (table) => ({ slugUnique: uniqueIndex("industries_slug_unique").on(table.slug) }),
+);
+
+export const TAG_KINDS = ["category", "tag"] as const;
+
+export const tags = sqliteTable(
+  "tags",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    kind: text("kind", { enum: TAG_KINDS }).notNull().default("tag"),
+    nameEn: text("name_en").notNull(),
+    nameAr: text("name_ar").notNull(),
+  },
+  (table) => ({ slugUnique: uniqueIndex("tags_slug_unique").on(table.slug) }),
+);
+
+export const showcases = sqliteTable(
+  "showcases",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => cmsProducts.id),
+    type: text("type", { enum: SHOWCASE_TYPES }).notNull().default("demo-brand"),
+    status: text("status", { enum: CONTENT_STATUSES }).notNull().default("draft"),
+    /** Verified = real client story approved for public claims. */
+    verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+    featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+    order: integer("sort_order").notNull().default(0),
+    industryId: text("industry_id").references(() => industries.id),
+    /** Comma-separated tag ids — a join table is overkill at this scale. */
+    tagIds: text("tag_ids").notNull().default(""),
+
+    titleEn: text("title_en").notNull().default(""),
+    titleAr: text("title_ar").notNull().default(""),
+    summaryEn: text("summary_en").notNull().default(""),
+    summaryAr: text("summary_ar").notNull().default(""),
+    storyEn: text("story_en").notNull().default(""),
+    storyAr: text("story_ar").notNull().default(""),
+
+    seoTitleEn: text("seo_title_en").notNull().default(""),
+    seoTitleAr: text("seo_title_ar").notNull().default(""),
+    seoDescriptionEn: text("seo_description_en").notNull().default(""),
+    seoDescriptionAr: text("seo_description_ar").notNull().default(""),
+
+    /** JSON, validated by lib/content/blocks.ts (stats, capabilities,
+     * sections, sample businesses, demos…). EN is the source; AR holds
+     * sparse overrides merged at render time — same model V1 proved. */
+    blocksEn: text("blocks_en").notNull().default("{}"),
+    blocksAr: text("blocks_ar").notNull().default("{}"),
+
+    createdBy: text("created_by"),
+    updatedBy: text("updated_by"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
+  },
+  (table) => ({
+    slugUnique: uniqueIndex("showcases_slug_unique").on(table.slug),
+    byProduct: index("showcases_product_idx").on(table.productId),
+    byStatus: index("showcases_status_idx").on(table.status),
+  }),
+);
+
+/** Full snapshots on every save/transition — powers History + rollback. */
+export const contentVersions = sqliteTable(
+  "content_versions",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    /** What produced this version, e.g. "update", "transition:published". */
+    reason: text("reason").notNull(),
+    snapshot: text("snapshot").notNull(),
+    createdBy: text("created_by"),
+    createdByEmail: text("created_by_email"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => ({
+    byEntity: index("content_versions_entity_idx").on(table.entityType, table.entityId, table.createdAt),
+  }),
+);
+
+export type CmsProduct = typeof cmsProducts.$inferSelect;
+export type Showcase = typeof showcases.$inferSelect;
+export type Industry = typeof industries.$inferSelect;
+export type Tag = typeof tags.$inferSelect;
+export type ContentVersion = typeof contentVersions.$inferSelect;
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
