@@ -187,7 +187,10 @@ export function CameraRig({
       camera.position.lerp(desiredCamPos.current, lerpFactor);
       if (controls) controls.target.lerp(desiredTarget.current, lerpFactor);
 
-      if (!arrivedRef.current && camera.position.distanceTo(desiredCamPos.current) < 0.12) {
+      // 0.25 rather than a tighter epsilon: the approach is exponential,
+      // so the last few centimeters take the longest and add nothing
+      // visually — fire the arrival as soon as the framing is settled.
+      if (!arrivedRef.current && camera.position.distanceTo(desiredCamPos.current) < 0.25) {
         arrivedRef.current = true;
         onArrive();
       }

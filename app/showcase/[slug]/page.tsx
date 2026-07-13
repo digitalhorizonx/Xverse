@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getProductByShowcaseSlug } from "@/data/products";
-import { getShowcaseBySlug, SHOWCASES } from "@/data/showcases";
+import { getShowcaseBySlug } from "@/data/showcases";
 import { getBrandsByProduct } from "@/data/brands";
+import { getDict } from "@/lib/i18n/server";
+import { fmt } from "@/lib/i18n/config";
+import { localizeProduct, localizeShowcase } from "@/lib/i18n/localize";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   CapabilitiesSection,
@@ -28,16 +31,16 @@ const SLUG_ALIASES: Record<string, string> = {
   xauto: "xauto",
 };
 
-export function generateStaticParams() {
-  return SHOWCASES.map((showcase) => ({ slug: showcase.slug }));
-}
-
 export function generateMetadata({ params }: ShowcasePageProps): Metadata {
+  const { dict } = getDict();
   const product = getProductByShowcaseSlug(params.slug);
-  const showcase = getShowcaseBySlug(params.slug);
-  if (!product || !showcase) return {};
+  const rawShowcase = getShowcaseBySlug(params.slug);
+  // Thrown here (not only in the page body) so the 404 status is decided
+  // before app/loading.tsx starts streaming a 200 shell.
+  if (!product || !rawShowcase) notFound();
+  const showcase = localizeShowcase(rawShowcase, dict);
   return {
-    title: `${product.name} Showcase — ${showcase.heroTagline}`,
+    title: fmt(dict.meta.showcaseTitle, { product: product.name, tagline: showcase.heroTagline }),
     description: showcase.heroDescription,
   };
 }
@@ -48,11 +51,15 @@ export default function ShowcasePage({ params }: ShowcasePageProps) {
     redirect(`/showcase/${alias}`);
   }
 
-  const product = getProductByShowcaseSlug(params.slug);
-  const showcase = getShowcaseBySlug(params.slug);
-  if (!product || !showcase) {
+  const { dict } = getDict();
+  const rawProduct = getProductByShowcaseSlug(params.slug);
+  const rawShowcase = getShowcaseBySlug(params.slug);
+  if (!rawProduct || !rawShowcase) {
     notFound();
   }
+
+  const product = localizeProduct(rawProduct, dict);
+  const showcase = localizeShowcase(rawShowcase, dict);
 
   return (
     <ShowcaseShell product={product} showcase={showcase}>
@@ -71,24 +78,33 @@ type SectionProps = {
 };
 
 function XabilitySections({ product, showcase }: SectionProps) {
+  const { locale, dict } = getDict();
   const brands = getBrandsByProduct(product.id);
   return (
     <>
       <section id="worlds" className="scroll-mt-28 pt-6">
+        {/* Always-present h2 for this section: the 3D worlds block below
+            (which carries the visible h2) unmounts on low-capability /
+            reduced-motion clients, and heading order must survive that. */}
+        <h2 className="sr-only">
+          {showcase.sections.find((section) => section.id === "worlds")?.label ?? product.name}
+        </h2>
         <WorldShowcaseSection product={product} brands={brands} />
-        <div className="mx-auto max-w-6xl px-6 pt-12 sm:px-8">
+        <div className="mx-auto max-w-6xl px-5 pt-12 sm:px-8">
           <BrandExplorer brands={brands} productName={product.name} />
         </div>
       </section>
 
-      <section id="portal" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="portal" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Customer Portal"
-          title="Run your brand from one portal"
-          description="Try it: submit a request, approve or reject it, publish — and watch history and credits update live."
+          eyebrow={dict.sections.xability.portal.eyebrow}
+          title={dict.sections.xability.portal.title}
+          description={dict.sections.xability.portal.description}
           accentColor={product.accentColor}
         />
-        <PortalSimulator accent={product.color} />
+        {/* Keyed by locale: the simulator seeds its request/history state
+            with localized strings, so a language switch must remount it. */}
+        <PortalSimulator key={locale} accent={product.color} />
       </section>
 
       <CapabilitiesSection product={product} showcase={showcase} />
@@ -97,13 +113,14 @@ function XabilitySections({ product, showcase }: SectionProps) {
 }
 
 function XsiteSections({ product, showcase }: SectionProps) {
+  const { dict } = getDict();
   return (
     <>
-      <section id="templates" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="templates" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Live Previews"
-          title="Real templates, live in the browser"
-          description="Switch businesses, flip dark mode, and preview mobile — the theming and responsiveness you get, demonstrated."
+          eyebrow={dict.sections.xsite.templates.eyebrow}
+          title={dict.sections.xsite.templates.title}
+          description={dict.sections.xsite.templates.description}
           accentColor={product.accentColor}
         />
         <XsiteDemo templates={showcase.siteTemplates ?? []} />
@@ -115,13 +132,14 @@ function XsiteSections({ product, showcase }: SectionProps) {
 }
 
 function XappsSections({ product, showcase }: SectionProps) {
+  const { dict } = getDict();
   return (
     <>
-      <section id="apps" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="apps" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Live App Demos"
-          title="Tap through the apps we ship"
-          description="Three demo businesses, one phone. Switch screens, fire a push notification, and pull the network plug."
+          eyebrow={dict.sections.xapps.apps.eyebrow}
+          title={dict.sections.xapps.apps.title}
+          description={dict.sections.xapps.apps.description}
           accentColor={product.accentColor}
         />
         <XappsDemo demos={showcase.appDemos ?? []} />
@@ -133,13 +151,14 @@ function XappsSections({ product, showcase }: SectionProps) {
 }
 
 function XautoSections({ product, showcase }: SectionProps) {
+  const { dict } = getDict();
   return (
     <>
-      <section id="marketplace" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="marketplace" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Marketplace Demo"
-          title="Meridian Motors, running on XAuto"
-          description="Filter live listings and book a service bay — the marketplace and workshop working together."
+          eyebrow={dict.sections.xauto.marketplace.eyebrow}
+          title={dict.sections.xauto.marketplace.title}
+          description={dict.sections.xauto.marketplace.description}
           accentColor={product.accentColor}
         />
         <XautoDemo
@@ -149,10 +168,10 @@ function XautoSections({ product, showcase }: SectionProps) {
         />
       </section>
 
-      <section id="dashboards" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="dashboards" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Dashboards"
-          title="One system, two dashboards"
+          eyebrow={dict.sections.xauto.dashboards.eyebrow}
+          title={dict.sections.xauto.dashboards.title}
           accentColor={product.accentColor}
         />
         <XautoDashboards accent={product.color} />
@@ -165,13 +184,14 @@ function XautoSections({ product, showcase }: SectionProps) {
 }
 
 function AiSections({ product, showcase }: SectionProps) {
+  const { dict } = getDict();
   return (
     <>
-      <section id="agent" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="agent" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Agent Demo"
-          title="Watch an agent resolve a claim"
-          description="A real conversation pattern: intake, verification, action, confirmation — played live."
+          eyebrow={dict.sections.ai.agent.eyebrow}
+          title={dict.sections.ai.agent.title}
+          description={dict.sections.ai.agent.description}
           accentColor={product.accentColor}
         />
         <AiChatDemo
@@ -181,11 +201,11 @@ function AiSections({ product, showcase }: SectionProps) {
         />
       </section>
 
-      <section id="workflows" className="mx-auto max-w-6xl scroll-mt-28 px-6 py-20 sm:px-8">
+      <section id="workflows" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeading
-          eyebrow="Workflows"
-          title="Trigger → steps → outcome"
-          description="Pick a workflow and run it — every step lights up as the automation executes."
+          eyebrow={dict.sections.ai.workflows.eyebrow}
+          title={dict.sections.ai.workflows.title}
+          description={dict.sections.ai.workflows.description}
           accentColor={product.accentColor}
         />
         <AiWorkflowsDemo workflows={showcase.aiWorkflows ?? []} accent={product.color} />

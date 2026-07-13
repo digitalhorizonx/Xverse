@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { getDict } from "@/lib/i18n/server";
 
 export interface Crumb {
   label: ReactNode;
@@ -13,8 +14,9 @@ export interface Crumb {
  * step back up one level at a time.
  */
 export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
+  const { dict } = getDict();
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-xs text-mist-500">
+    <nav aria-label={dict.breadcrumbs.ariaLabel} className="flex flex-wrap items-center gap-1.5 text-xs text-mist-500">
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;
         return (
@@ -28,7 +30,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
                 {crumb.label}
               </span>
             )}
-            {!isLast && <ChevronRight className="h-3 w-3 text-mist-600" aria-hidden />}
+            {!isLast && <ChevronRight className="h-3 w-3 text-mist-500" aria-hidden />}
           </span>
         );
       })}

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BRANDS, getBrandBySlug } from "@/data/brands";
+import { getBrandBySlug } from "@/data/brands";
 import { getProduct } from "@/data/products";
+import { getDict } from "@/lib/i18n/server";
+import { fmt } from "@/lib/i18n/config";
 import { SiteHeader } from "@/components/nav/SiteHeader";
 import { Breadcrumbs } from "@/components/showcase/Breadcrumbs";
 import { ArrivalOverlay } from "@/components/fx/ArrivalOverlay";
@@ -22,24 +24,23 @@ interface BrandPageProps {
   params: { product: string; brand: string };
 }
 
-export function generateStaticParams() {
-  return BRANDS.filter((brand) => brand.active).map((brand) => ({
-    product: brand.product,
-    brand: brand.slug,
-  }));
-}
+// No generateStaticParams: every page renders per-request now that the
+// locale cookie decides the language server-side.
 
 export function generateMetadata({ params }: BrandPageProps): Metadata {
+  const { dict } = getDict();
   const brand = getBrandBySlug(params.product, params.brand);
-  if (!brand) return {};
+  // Thrown here so the 404 status commits before streaming begins.
+  if (!brand) notFound();
 
   return {
-    title: `${brand.name} — Demo Brand`,
+    title: fmt(dict.brandWorlds.demoBrandMeta, { brand: brand.name }),
     description: brand.description,
   };
 }
 
 export default function BrandPage({ params }: BrandPageProps) {
+  const { dict } = getDict();
   const brand = getBrandBySlug(params.product, params.brand);
   const product = getProduct(params.product);
 
@@ -54,8 +55,8 @@ export default function BrandPage({ params }: BrandPageProps) {
       <div className="mx-auto max-w-6xl px-6 pt-5 sm:px-8">
         <Breadcrumbs
           crumbs={[
-            { label: "Universe", href: "/" },
-            { label: "Showcase", href: "/showcase" },
+            { label: dict.breadcrumbs.universe, href: "/" },
+            { label: dict.breadcrumbs.showcase, href: "/showcase" },
             { label: product.name, href: `/showcase/${product.showcaseSlug}` },
             { label: brand.name },
           ]}

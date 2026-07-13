@@ -1,3 +1,5 @@
+import type { Dictionary } from "@/lib/i18n/types";
+
 // Central CTA destinations — every showcase and page links through these,
 // so there is exactly one place to retarget when funnels change and no
 // page can drift into a dead link.
@@ -13,7 +15,10 @@ export interface CtaLink {
   external?: boolean;
 }
 
-export const PRIMARY_CTAS: CtaLink[] = [
-  { label: "Book a demo", href: HORIZONX_START_URL, external: true },
-  { label: "Talk to sales", href: TALK_TO_SALES_URL, external: true },
-];
+/** The two conversion CTAs, labeled in the visitor's language. */
+export function getPrimaryCtas(dict: Dictionary): CtaLink[] {
+  return [
+    { label: dict.cta.bookDemo, href: HORIZONX_START_URL, external: true },
+    { label: dict.cta.talkToSales, href: TALK_TO_SALES_URL, external: true },
+  ];
+}

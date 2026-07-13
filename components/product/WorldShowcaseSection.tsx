@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useDeviceCapability } from "@/hooks/useDeviceCapability";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { fmt } from "@/lib/i18n/config";
 import type { Brand, ProductPlanet } from "@/data/types";
 
 // Same treatment as the universe scene: three.js stays out of the server
@@ -28,6 +30,7 @@ interface WorldShowcaseSectionProps {
  * 3D layer is purely additive.
  */
 export function WorldShowcaseSection({ product, brands }: WorldShowcaseSectionProps) {
+  const { dict } = useLocale();
   const reducedMotion = useReducedMotion();
   const capability = useDeviceCapability();
 
@@ -39,10 +42,10 @@ export function WorldShowcaseSection({ product, brands }: WorldShowcaseSectionPr
     <section className="mx-auto max-w-6xl px-6 pt-12 sm:px-8">
       <div className="mb-6 flex flex-col gap-1">
         <span className="text-xs font-medium uppercase tracking-[0.3em] text-nebula-400">
-          Sample Worlds
+          {dict.brandWorlds.sampleWorlds}
         </span>
         <h2 className="font-display text-xl font-semibold text-mist-100">
-          Explore {product.name} demo worlds in 3D
+          {fmt(dict.brandWorlds.exploreWorlds, { product: product.name })}
         </h2>
       </div>
       <WorldShowcase product={product} brands={brands} />

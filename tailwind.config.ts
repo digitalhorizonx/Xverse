@@ -54,12 +54,13 @@ const config: Config = {
       fontFamily: {
         sans: [
           "var(--font-inter)",
+          "var(--font-arabic)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
           "sans-serif",
         ],
-        display: ["var(--font-cal)", "var(--font-inter)", "sans-serif"],
+        display: ["var(--font-cal)", "var(--font-inter)", "var(--font-arabic)", "sans-serif"],
       },
       backgroundImage: {
         "brand-gradient":

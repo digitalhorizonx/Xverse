@@ -43,13 +43,13 @@ export function ParallaxSky() {
       <div
         ref={nebulaRef}
         aria-hidden
-        className="fixed inset-0 scale-[1.15] bg-cover bg-center opacity-70 will-change-transform"
+        className="sky-nebula fixed inset-0 scale-[1.15] bg-cover bg-center will-change-transform"
         style={{ backgroundImage: "url(/images/nebula.webp)" }}
       />
       <div
         ref={gridRef}
         aria-hidden
-        className="fixed inset-0 bg-grid-lines bg-[size:64px_64px] opacity-25 will-change-transform"
+        className="sky-grid fixed inset-0 bg-grid-lines bg-[size:64px_64px] will-change-transform"
       />
     </>
   );

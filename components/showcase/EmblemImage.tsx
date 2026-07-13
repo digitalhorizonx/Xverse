@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createEmblemTexture } from "@/components/universe/emblems";
+import { drawEmblemCanvas } from "@/components/universe/emblemCanvas";
 import type { ProductPlanet } from "@/data/types";
 
 /**
@@ -22,10 +22,8 @@ export function EmblemImage({
   const [src, setSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    const texture = createEmblemTexture(planet.id, planet.color, planet.accentColor);
-    const canvas = texture.image as HTMLCanvasElement;
+    const canvas = drawEmblemCanvas(planet.id, planet.color, planet.accentColor);
     setSrc(canvas.toDataURL("image/png"));
-    texture.dispose();
   }, [planet.id, planet.color, planet.accentColor]);
 
   if (!src) {

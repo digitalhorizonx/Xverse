@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ShowcaseSection } from "@/data/types";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 /**
  * Sticky in-page navigation for a showcase's sections, with scroll-spy
@@ -9,6 +10,7 @@ import type { ShowcaseSection } from "@/data/types";
  * like a bottomless page.
  */
 export function SectionNav({ sections, accentColor }: { sections: ShowcaseSection[]; accentColor: string }) {
+  const { dict } = useLocale();
   const [activeId, setActiveId] = useState(sections[0]?.id);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function SectionNav({ sections, accentColor }: { sections: ShowcaseSectio
   return (
     <div className="sticky top-[52px] z-30 border-b border-white/5 bg-ink-950/85 backdrop-blur-xl">
       <nav
-        aria-label="Showcase sections"
+        aria-label={dict.sectionNav.ariaLabel}
         className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-6 py-2 sm:px-8"
       >
         {sections.map((section) => {

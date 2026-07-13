@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-nebula-500 text-white hover:bg-nebula-400",
+  // Literal #fff, not text-white: the token flips dark in light mode, but
+  // this button's violet fill stays dark in both themes. nebula-600 (not
+  // 500) keeps the label at AA contrast.
+  primary: "bg-nebula-600 text-[#fff] hover:bg-nebula-500",
   secondary: "glass text-mist-200 hover:text-white hover:border-white/25",
   ghost: "text-mist-300 hover:text-white",
 };
