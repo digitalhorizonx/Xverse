@@ -1,0 +1,54 @@
+name: Live Smoke (temporary)
+
+# One-shot live verification of https://xverse.horizonx.site after the V1
+# polish deploy. Runs from the GitHub runner (open egress). Deleted after
+# use — this is not part of the deployment standard.
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Live smoke suite
+        run: |
+          set -euo pipefail
+          BASE="https://xverse.horizonx.site"
+          fail=0
+          check() { # name expected actual
+            if [ "$2" = "$3" ]; then echo "PASS: $1 ($3)"; else echo "FAIL: $1 (expected $2, got $3)"; fail=1; fi
+          }
+
+          # Health + readiness
+          check "health"    "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/health")"
+          check "readiness" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/health/ready")"
+
+          # Homepage EN
+          home=$(curl -s "$BASE/")
+          check "home 200" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/")"
+          echo "$home" | grep -q 'Enter the' && echo "PASS: hero copy present" || { echo "FAIL: hero copy"; fail=1; }
+          echo "$home" | grep -q 'lang="en"' && echo "PASS: lang=en default" || { echo "FAIL: lang attr"; fail=1; }
+          echo "$home" | grep -q 'https://xverse.horizonx.site' && echo "PASS: canonical siteUrl" || { echo "FAIL: siteUrl"; fail=1; }
+
+          # Arabic first-visit via Accept-Language
+          ar=$(curl -s -H "Accept-Language: ar-SA,ar;q=0.9" "$BASE/")
+          echo "$ar" | grep -q 'dir="rtl"' && echo "PASS: Accept-Language ar → RTL" || { echo "FAIL: RTL"; fail=1; }
+
+          # Arabic via cookie persists
+          arc=$(curl -s -H "Cookie: xverse-locale=ar" "$BASE/showcase")
+          echo "$arc" | grep -q 'lang="ar"' && echo "PASS: locale cookie → ar" || { echo "FAIL: locale cookie"; fail=1; }
+
+          # All five showcases + index
+          for p in showcase showcase/xability showcase/xsite showcase/xapps showcase/xauto showcase/ai; do
+            check "/$p" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/$p")"
+          done
+
+          # Alias 308s and 404s
+          check "alias /showcase/xai" "308" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/showcase/xai")"
+          check "legacy /xability"    "308" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/xability")"
+          check "unknown slug 404"    "404" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/showcase/nope")"
+
+          # Brand world
+          check "brand world" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/xability/amber-oak-coffee")"
+
+          exit $fail
