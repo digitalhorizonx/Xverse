@@ -15,6 +15,13 @@
       "when": 1783945696684,
       "tag": "0001_phase3_content",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1783947004176,
+      "tag": "0002_phase4_media",
+      "breakpoints": true
     }
   ]
 }

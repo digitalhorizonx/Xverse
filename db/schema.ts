@@ -206,6 +206,37 @@ export const showcases = sqliteTable(
   }),
 );
 
+export const MEDIA_KINDS = ["image", "logo", "screenshot", "mockup", "video", "document"] as const;
+export type MediaKind = (typeof MEDIA_KINDS)[number];
+
+export const media = sqliteTable(
+  "media",
+  {
+    id: text("id").primaryKey(),
+    /** Content-hash filename on disk, e.g. "ab12…ef.webp" — never the
+     * user-supplied name (that lives in originalName for display). */
+    fileName: text("file_name").notNull(),
+    thumbFileName: text("thumb_file_name"),
+    originalName: text("original_name").notNull(),
+    mime: text("mime").notNull(),
+    kind: text("kind", { enum: MEDIA_KINDS }).notNull().default("image"),
+    sizeBytes: integer("size_bytes").notNull(),
+    width: integer("width"),
+    height: integer("height"),
+    altEn: text("alt_en").notNull().default(""),
+    altAr: text("alt_ar").notNull().default(""),
+    createdBy: text("created_by"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => ({
+    fileUnique: uniqueIndex("media_file_unique").on(table.fileName),
+    byKind: index("media_kind_idx").on(table.kind),
+  }),
+);
+
+export type MediaRow = typeof media.$inferSelect;
+
 /** Full snapshots on every save/transition — powers History + rollback. */
 export const contentVersions = sqliteTable(
   "content_versions",

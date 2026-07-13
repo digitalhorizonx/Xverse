@@ -134,7 +134,12 @@ export function AdminDialog({
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- backdrop click-to-close convenience; Escape + the Close button are the accessible paths
     <dialog
       ref={ref}
-      onClose={onClose}
+      onClose={(event) => {
+        // React's synthetic close event bubbles (the native one doesn't) —
+        // without this guard, a nested confirm dialog closing would close
+        // its parent dialog too.
+        if (event.target === ref.current) onClose();
+      }}
       onClick={(event) => {
         if (event.target === ref.current) onClose(); // backdrop click
       }}
