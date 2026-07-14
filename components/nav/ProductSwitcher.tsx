@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { PRODUCTS } from "@/data/products";
+import { getPublicProducts } from "@/lib/content/publicContent";
 import { getDict } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
 export function ProductSwitcher({ currentProductId }: { currentProductId?: string }) {
-  const { dict } = getDict();
+  const { dict, locale } = getDict();
 
   return (
     <nav aria-label={dict.header.productNav} className="flex flex-wrap items-center gap-2">
-      {PRODUCTS.map((product) => {
+      {getPublicProducts(locale).map((product) => {
         const isCurrent = product.id === currentProductId;
         return (
           <Link

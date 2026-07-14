@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getBrandBySlug } from "@/data/brands";
-import { getProduct } from "@/data/products";
+import { getPublicBrandBySlug, getPublicProductById } from "@/lib/content/publicContent";
 import { getDict } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
 import { SiteHeader } from "@/components/nav/SiteHeader";
@@ -29,7 +28,7 @@ interface BrandPageProps {
 
 export function generateMetadata({ params }: BrandPageProps): Metadata {
   const { dict } = getDict();
-  const brand = getBrandBySlug(params.product, params.brand);
+  const brand = getPublicBrandBySlug(params.product, params.brand);
   // Thrown here so the 404 status commits before streaming begins.
   if (!brand) notFound();
 
@@ -40,9 +39,9 @@ export function generateMetadata({ params }: BrandPageProps): Metadata {
 }
 
 export default function BrandPage({ params }: BrandPageProps) {
-  const { dict } = getDict();
-  const brand = getBrandBySlug(params.product, params.brand);
-  const product = getProduct(params.product);
+  const { dict, locale } = getDict();
+  const brand = getPublicBrandBySlug(params.product, params.brand);
+  const product = getPublicProductById(params.product, locale);
 
   if (!brand || !product) {
     notFound();

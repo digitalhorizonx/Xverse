@@ -64,3 +64,15 @@ before content migrations in later phases).
 `/api/health/ready` now verifies the database is reachable and returns 503
 (`database: "error"`) if not — existing deploy verification picks this up
 without changes.
+
+## Content migration (Phase 5)
+
+On every boot, right after the product-catalog seed, the server runs
+`migrateV1ContentIfNeeded()` — it inserts the five product showcase pages
+and the five Xability demo brands as published `showcases` rows if (and
+only if) a row with that slug doesn't already exist. It never updates an
+existing row, so it is safe to redeploy indefinitely and safe to run
+before this admin content existed at all. See
+`docs/v2-phase5-migration.md` for the full inventory, verification, and
+rollback procedure. **Take a `backup-db.sh` snapshot before the first
+deploy that includes this migration**, same as any schema change.

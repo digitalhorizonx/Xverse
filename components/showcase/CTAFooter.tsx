@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { getPrimaryCtas } from "@/lib/cta";
 import { getDict } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
-import { PRODUCTS } from "@/data/products";
+import { getPublicProducts } from "@/lib/content/publicContent";
 import type { ProductPlanet } from "@/data/types";
 
 /**
@@ -13,8 +13,8 @@ import type { ProductPlanet } from "@/data/types";
  * back to the universe. No showcase ends in a dead end.
  */
 export function CTAFooter({ product }: { product: ProductPlanet }) {
-  const { dict } = getDict();
-  const others = PRODUCTS.filter((p) => p.id !== product.id);
+  const { dict, locale } = getDict();
+  const others = getPublicProducts(locale).filter((p) => p.id !== product.id);
   const primaryCtas = getPrimaryCtas(dict);
 
   return (

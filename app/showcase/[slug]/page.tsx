@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { getProductByShowcaseSlug } from "@/data/products";
-import { getShowcaseBySlug } from "@/data/showcases";
-import { getBrandsByProduct } from "@/data/brands";
 import { getDict } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
-import { localizeProduct, localizeShowcase } from "@/lib/i18n/localize";
+import {
+  getPublicBrandsByProduct,
+  getPublicProductByShowcaseSlug,
+  getPublicShowcaseBySlug,
+} from "@/lib/content/publicContent";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   CapabilitiesSection,
@@ -32,13 +33,12 @@ const SLUG_ALIASES: Record<string, string> = {
 };
 
 export function generateMetadata({ params }: ShowcasePageProps): Metadata {
-  const { dict } = getDict();
-  const product = getProductByShowcaseSlug(params.slug);
-  const rawShowcase = getShowcaseBySlug(params.slug);
+  const { dict, locale } = getDict();
+  const product = getPublicProductByShowcaseSlug(params.slug, locale);
+  const showcase = getPublicShowcaseBySlug(params.slug, locale);
   // Thrown here (not only in the page body) so the 404 status is decided
   // before app/loading.tsx starts streaming a 200 shell.
-  if (!product || !rawShowcase) notFound();
-  const showcase = localizeShowcase(rawShowcase, dict);
+  if (!product || !showcase) notFound();
   return {
     title: fmt(dict.meta.showcaseTitle, { product: product.name, tagline: showcase.heroTagline }),
     description: showcase.heroDescription,
@@ -51,15 +51,12 @@ export default function ShowcasePage({ params }: ShowcasePageProps) {
     redirect(`/showcase/${alias}`);
   }
 
-  const { dict } = getDict();
-  const rawProduct = getProductByShowcaseSlug(params.slug);
-  const rawShowcase = getShowcaseBySlug(params.slug);
-  if (!rawProduct || !rawShowcase) {
+  const { locale } = getDict();
+  const product = getPublicProductByShowcaseSlug(params.slug, locale);
+  const showcase = getPublicShowcaseBySlug(params.slug, locale);
+  if (!product || !showcase) {
     notFound();
   }
-
-  const product = localizeProduct(rawProduct, dict);
-  const showcase = localizeShowcase(rawShowcase, dict);
 
   return (
     <ShowcaseShell product={product} showcase={showcase}>
@@ -73,13 +70,13 @@ export default function ShowcasePage({ params }: ShowcasePageProps) {
 }
 
 type SectionProps = {
-  product: NonNullable<ReturnType<typeof getProductByShowcaseSlug>>;
-  showcase: NonNullable<ReturnType<typeof getShowcaseBySlug>>;
+  product: NonNullable<ReturnType<typeof getPublicProductByShowcaseSlug>>;
+  showcase: NonNullable<ReturnType<typeof getPublicShowcaseBySlug>>;
 };
 
 function XabilitySections({ product, showcase }: SectionProps) {
   const { locale, dict } = getDict();
-  const brands = getBrandsByProduct(product.id);
+  const brands = getPublicBrandsByProduct(product.id);
   return (
     <>
       <section id="worlds" className="scroll-mt-28 pt-6">

@@ -3,10 +3,8 @@ import { SiteHeader } from "@/components/nav/SiteHeader";
 import { Breadcrumbs } from "@/components/showcase/Breadcrumbs";
 import { ShowcaseExplorer, type ShowcaseCard } from "@/components/showcase/ShowcaseExplorer";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PRODUCTS } from "@/data/products";
-import { getShowcaseByProductId } from "@/data/showcases";
 import { getDict } from "@/lib/i18n/server";
-import { localizeProduct, localizeShowcase } from "@/lib/i18n/localize";
+import { getPublicProducts, getPublicShowcaseByProductId } from "@/lib/content/publicContent";
 
 export function generateMetadata(): Metadata {
   const { dict } = getDict();
@@ -17,12 +15,10 @@ export function generateMetadata(): Metadata {
 }
 
 export default function ShowcaseIndexPage() {
-  const { dict } = getDict();
+  const { dict, locale } = getDict();
 
-  const cards: ShowcaseCard[] = PRODUCTS.map((rawProduct) => {
-    const product = localizeProduct(rawProduct, dict);
-    const rawShowcase = getShowcaseByProductId(product.id);
-    const showcase = rawShowcase ? localizeShowcase(rawShowcase, dict) : undefined;
+  const cards: ShowcaseCard[] = getPublicProducts(locale).map((product) => {
+    const showcase = getPublicShowcaseByProductId(product.id, locale) ?? undefined;
     const industries = [...new Set(showcase?.sampleBusinesses.map((b) => b.industry) ?? [])];
     return {
       id: product.id,

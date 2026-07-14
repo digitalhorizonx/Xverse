@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { getProduct } from "@/data/products";
+import { getPublicProductById } from "@/lib/content/publicContent";
+import { getLocale } from "@/lib/i18n/server";
 
 interface ProductPageProps {
   params: { product: string };
@@ -14,13 +15,13 @@ interface ProductPageProps {
  * before app/loading.tsx streams a 200 shell.
  */
 export function generateMetadata({ params }: ProductPageProps): Metadata {
-  const product = getProduct(params.product);
+  const product = getPublicProductById(params.product, getLocale());
   if (!product) notFound();
   redirect(`/showcase/${product.showcaseSlug}`);
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const product = getProduct(params.product);
+  const product = getPublicProductById(params.product, getLocale());
   if (!product) {
     notFound();
   }

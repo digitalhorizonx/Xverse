@@ -10,11 +10,13 @@ export async function register() {
     const { runMigrations } = await import("./db/migrate");
     const { bootstrapAdmin } = await import("./lib/auth/bootstrap");
     const { seedProductsIfEmpty } = await import("./lib/content/seedProducts");
+    const { migrateV1ContentIfNeeded } = await import("./lib/content/migrateV1Content");
     const { databasePath } = await import("./db");
     runMigrations();
     logger.info("db_migrated", { path: databasePath() });
     await bootstrapAdmin();
     seedProductsIfEmpty();
+    migrateV1ContentIfNeeded();
 
     logger.info("server_starting", {
       pid: process.pid,
