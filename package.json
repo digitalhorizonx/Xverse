@@ -17,7 +17,7 @@
     "better-sqlite3": "^12.11.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
-    "framer-motion": "^11.11.17",
+    "framer-motion": "^12.42.2",
     "lucide-react": "^0.454.0",
     "next": "^14.2.35",
     "react": "^18.3.1",
