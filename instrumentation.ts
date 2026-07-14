@@ -9,10 +9,12 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { runMigrations } = await import("./db/migrate");
     const { bootstrapAdmin } = await import("./lib/auth/bootstrap");
+    const { seedProductsIfEmpty } = await import("./lib/content/seedProducts");
     const { databasePath } = await import("./db");
     runMigrations();
     logger.info("db_migrated", { path: databasePath() });
     await bootstrapAdmin();
+    seedProductsIfEmpty();
 
     logger.info("server_starting", {
       pid: process.pid,

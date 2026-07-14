@@ -1,0 +1,16 @@
+import { NextResponse } from "next/server";
+import { adminRoute } from "@/lib/auth/adminRoute";
+import { recordAudit } from "@/lib/auth/audit";
+import { deleteTag } from "@/lib/content/catalog";
+
+export const DELETE = adminRoute("content.delete", (_request, auth, params) => {
+  deleteTag(params.id!);
+  recordAudit({
+    actorId: auth.user.id,
+    actorEmail: auth.user.email,
+    action: "content.tag_delete",
+    entityType: "tag",
+    entityId: params.id,
+  });
+  return NextResponse.json({ ok: true });
+});
