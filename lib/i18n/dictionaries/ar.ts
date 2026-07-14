@@ -206,6 +206,29 @@ export const ar: Dictionary = {
     },
   },
 
+  admin: {
+    consoleName: "لوحة تحكم Xverse",
+    loginTitle: "تسجيل الدخول إلى لوحة تحكم Xverse",
+    loginSubtitle: "الدخول لفريق HorizonX فقط.",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    signIn: "تسجيل الدخول",
+    signingIn: "جارٍ تسجيل الدخول…",
+    signOut: "تسجيل الخروج",
+    errorInvalid: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    errorRateLimited: "محاولات كثيرة. حاول مجددًا بعد دقائق.",
+    errorGeneric: "حدث خطأ ما. حاول مجددًا.",
+    dashboardTitle: "لوحة التحكم",
+    signedInAs: "مسجّل الدخول باسم",
+    role: "الدور",
+    roleAdmin: "مدير",
+    roleEditor: "محرر",
+    roleViewer: "مشاهد",
+    phase1Note:
+      "وحدة إدارة المحتوى تصل في المرحلة القادمة. المصادقة والأدوار وسجل التدقيق تعمل الآن.",
+    backToSite: "العودة إلى الموقع العام",
+  },
+
   demos: {
     portal: {
       heading: "طلبات المحتوى",

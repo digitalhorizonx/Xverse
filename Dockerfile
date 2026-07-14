@@ -5,6 +5,10 @@ ARG NODE_VERSION=20-alpine
 # ---- deps: install dependencies only, cached separately from source changes
 FROM node:${NODE_VERSION} AS deps
 WORKDIR /app
+# Toolchain for native modules (better-sqlite3): used only if no musl
+# prebuild matches — guarantees npm ci succeeds either way. Build stage
+# only; the runner image never carries these.
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -43,6 +47,15 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Committed Drizzle migrations — applied at startup (see instrumentation.ts).
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+
+# /data is the persistent volume mount point (SQLite + media). Creating it
+# here with the right owner makes Docker initialize a fresh named volume
+# with nextjs-writable permissions; the rest of the container stays
+# read-only (see docker-compose.prod.yml).
+RUN mkdir -p /data && chown nextjs:nodejs /data
+ENV DATABASE_PATH=/data/xverse.db
 
 USER nextjs
 

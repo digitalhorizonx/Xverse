@@ -216,6 +216,30 @@ export const en = {
     },
   },
 
+  // Admin console chrome (Phase 1: login + placeholder dashboard).
+  admin: {
+    consoleName: "Xverse Admin",
+    loginTitle: "Sign in to Xverse Admin",
+    loginSubtitle: "HorizonX team access only.",
+    email: "Email",
+    password: "Password",
+    signIn: "Sign in",
+    signingIn: "Signing in…",
+    signOut: "Sign out",
+    errorInvalid: "Incorrect email or password.",
+    errorRateLimited: "Too many attempts. Try again in a few minutes.",
+    errorGeneric: "Something went wrong. Try again.",
+    dashboardTitle: "Dashboard",
+    signedInAs: "Signed in as",
+    role: "Role",
+    roleAdmin: "Admin",
+    roleEditor: "Editor",
+    roleViewer: "Viewer",
+    phase1Note:
+      "The content management console arrives in the next phase. Authentication, roles, and the audit trail are live.",
+    backToSite: "Back to the public site",
+  },
+
   demos: {
     portal: {
       heading: "Content requests",

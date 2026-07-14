@@ -7,6 +7,9 @@ const nextConfig = {
   },
   experimental: {
     instrumentationHook: true,
+    // Native module: must be required at runtime from node_modules, not
+    // bundled by webpack (the .node binding can't be inlined).
+    serverComponentsExternalPackages: ["better-sqlite3"],
   },
   // Real HTTP redirects (proper 308s, resolved before rendering) for the
   // product-id spellings people guess and the legacy /<product> routes.
