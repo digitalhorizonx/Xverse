@@ -4,13 +4,13 @@ import { Universe } from "@/components/universe/Universe";
 import { ParallaxSky } from "@/components/fx/ParallaxSky";
 import { SiteHeader } from "@/components/nav/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
-import { PRODUCTS } from "@/data/products";
+import { getPublicProducts } from "@/lib/content/publicContent";
 import { getDict } from "@/lib/i18n/server";
-import { localizeProduct } from "@/lib/i18n/localize";
 import { TALK_TO_SALES_URL } from "@/lib/cta";
 
 export default function HomePage() {
-  const { dict } = getDict();
+  const { dict, locale } = getDict();
+  const products = getPublicProducts(locale);
 
   // The hero is rendered twice by <Universe>: as a normal in-flow block
   // above the 3D window on phones (so copy never overlaps the scene) and
@@ -60,7 +60,7 @@ export default function HomePage() {
       <ParallaxSky />
 
       <div className="relative">
-        <Universe hero={hero} />
+        <Universe hero={hero} products={products} />
 
         <section className="relative mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
           <div className="mb-10 flex flex-col items-center gap-3 text-center sm:mb-12">
@@ -74,8 +74,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {PRODUCTS.map((rawProduct) => {
-              const product = localizeProduct(rawProduct, dict);
+            {products.map((product) => {
               const isLive = product.status === "live";
               return (
                 <Link key={product.id} href={`/showcase/${product.showcaseSlug}`} className="block">

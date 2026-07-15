@@ -8,7 +8,7 @@ import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import type { Group } from "three";
 import type { Vector3 } from "three";
 import type { MutableRefObject } from "react";
-import { PRODUCTS } from "@/data/products";
+import type { ProductPlanet } from "@/data/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { fmt } from "@/lib/i18n/config";
 import { Core } from "./Core";
@@ -32,9 +32,10 @@ interface UniverseSceneProps {
   /** Play the once-per-session warp-in entry sequence. */
   playEntry?: boolean;
   onEntryComplete?: () => void;
+  products: ProductPlanet[];
 }
 
-export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }: UniverseSceneProps) {
+export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete, products }: UniverseSceneProps) {
   const router = useRouter();
   const { dict } = useLocale();
   const [phase, setPhase] = useState<RigPhase>(playEntry ? "entry" : "journey");
@@ -55,8 +56,8 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
   const fxRef = useRef<WarpFx>({ intensity: 0 });
 
   const focusedPlanet = useMemo(
-    () => PRODUCTS.find((product) => product.id === focusedId) ?? null,
-    [focusedId],
+    () => products.find((product) => product.id === focusedId) ?? null,
+    [focusedId, products],
   );
 
   function handleSelect(id: string) {
@@ -108,12 +109,12 @@ export function UniverseScene({ scrollRef, playEntry = false, onEntryComplete }:
         <Core showLabel={!focusedId && phase === "journey"} />
         <WarpStreaks fxRef={fxRef} />
 
-        {PRODUCTS.map((planet, index) => (
+        {products.map((planet, index) => (
           <group key={planet.id}>
             <OrbitRing radius={planet.orbitRadius} color={planet.color} />
             <Planet
               planet={planet}
-              angleOffset={(index / PRODUCTS.length) * Math.PI * 2}
+              angleOffset={(index / products.length) * Math.PI * 2}
               isFocused={focusedId === planet.id}
               onSelect={handleSelect}
               registerRef={(id, group) => {

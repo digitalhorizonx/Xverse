@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import type { ProductPlanet } from "@/data/types";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useDeviceCapability } from "@/hooks/useDeviceCapability";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
@@ -17,6 +18,9 @@ interface UniverseProps {
    * phones (never overlapping the scene) and floating inside the viewport
    * from md up. */
   hero?: ReactNode;
+  /** Active products, already localized server-side — this whole tree is
+   * client-only, so it can't read the DB itself. */
+  products: ProductPlanet[];
 }
 
 /**
@@ -31,7 +35,7 @@ interface UniverseProps {
  * orbital plane. On the first visit of a session it opens with a warp-in
  * entry sequence.
  */
-export function Universe({ hero }: UniverseProps) {
+export function Universe({ hero, products }: UniverseProps) {
   const reducedMotion = useReducedMotion();
   const capability = useDeviceCapability();
 
@@ -43,15 +47,15 @@ export function Universe({ hero }: UniverseProps) {
     return (
       <>
         {hero && <div className="relative px-5 pb-4 pt-10 sm:px-6 sm:pt-16">{hero}</div>}
-        <UniverseFallback />
+        <UniverseFallback products={products} />
       </>
     );
   }
 
-  return <UniverseJourney hero={hero} />;
+  return <UniverseJourney hero={hero} products={products} />;
 }
 
-function UniverseJourney({ hero }: UniverseProps) {
+function UniverseJourney({ hero, products }: UniverseProps) {
   const { dict } = useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -108,6 +112,7 @@ function UniverseJourney({ hero }: UniverseProps) {
             scrollRef={scrollRef}
             playEntry={playEntry}
             onEntryComplete={() => setEntryDone(true)}
+            products={products}
           />
 
           {/* Desktop: hero floats inside the viewport, fading in after the

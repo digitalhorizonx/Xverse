@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { MutableRefObject } from "react";
+import type { ProductPlanet } from "@/data/types";
 import { UniverseLoading } from "./UniverseLoading";
 
 // The 3D scene pulls in three.js + postprocessing — sizable, client-only
@@ -16,12 +17,13 @@ interface UniverseCanvasProps {
   scrollRef?: MutableRefObject<number>;
   playEntry?: boolean;
   onEntryComplete?: () => void;
+  products: ProductPlanet[];
 }
 
-export function UniverseCanvas({ scrollRef, playEntry, onEntryComplete }: UniverseCanvasProps) {
+export function UniverseCanvas({ scrollRef, playEntry, onEntryComplete, products }: UniverseCanvasProps) {
   return (
     <div className="h-full min-h-[480px] w-full">
-      <UniverseScene scrollRef={scrollRef} playEntry={playEntry} onEntryComplete={onEntryComplete} />
+      <UniverseScene scrollRef={scrollRef} playEntry={playEntry} onEntryComplete={onEntryComplete} products={products} />
     </div>
   );
 }

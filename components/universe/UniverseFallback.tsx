@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { PRODUCTS } from "@/data/products";
+import type { ProductPlanet } from "@/data/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-import { localizeProduct } from "@/lib/i18n/localize";
 
 /**
  * Non-3D fallback for reduced-motion preference and low-capability
@@ -11,7 +10,7 @@ import { localizeProduct } from "@/lib/i18n/localize";
  * the 3D scene, just laid out as a static, fully accessible grid instead
  * of an interactive canvas.
  */
-export function UniverseFallback() {
+export function UniverseFallback({ products }: { products: ProductPlanet[] }) {
   const { dict } = useLocale();
 
   return (
@@ -24,8 +23,7 @@ export function UniverseFallback() {
       </div>
 
       <div className="grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {PRODUCTS.map((rawProduct) => {
-          const product = localizeProduct(rawProduct, dict);
+        {products.map((product) => {
           const isLive = product.status === "live";
           return (
             <Link key={product.id} href={`/showcase/${product.showcaseSlug}`} className="block">
