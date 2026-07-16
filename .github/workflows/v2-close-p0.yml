@@ -56,7 +56,7 @@ jobs:
 
             echo "== installing the nightly cron (idempotent) =="
             CRON_LINE="17 3 * * * BACKUP_DIR=$BACKUP_DIR $DIR/backup-db.sh $TARGET_ENV >> /var/log/xverse-backup.log 2>&1"
-            ( crontab -l 2>/dev/null | grep -vF "backup-db.sh $TARGET_ENV" ; echo "$CRON_LINE" ) | crontab -
+            { crontab -l 2>/dev/null | grep -vF "backup-db.sh $TARGET_ENV" || true; echo "$CRON_LINE"; } | crontab -
             echo "full crontab now:"
             crontab -l || echo "(crontab -l failed)"
 
