@@ -6,6 +6,11 @@ name: V2 Close P0 Items (temporary)
 # before trusting the schedule) and removes the now-inert
 # ADMIN_BOOTSTRAP_* keys from .env. Never prints secret values. Removed
 # after use.
+#
+# BACKUP_DIR override: /opt/horizonx/backups is root-owned and the deploy
+# SSH user has no passwordless sudo (confirmed via v2-diag.yml), so
+# backups are written under the product dir the deploy user already owns
+# instead. See docs/v2-operations.md.
 
 on:
   workflow_dispatch:
@@ -39,6 +44,7 @@ jobs:
           script: |
             set -e
             DIR="/opt/horizonx/products/xverse/$TARGET_ENV"
+            BACKUP_DIR="$DIR/backups"
             cd "$DIR"
 
             echo "== installing backup-db.sh =="
@@ -46,10 +52,10 @@ jobs:
             chmod +x backup-db.sh
 
             echo "== running one backup now, to prove it works =="
-            ./backup-db.sh "$TARGET_ENV"
+            BACKUP_DIR="$BACKUP_DIR" ./backup-db.sh "$TARGET_ENV"
 
             echo "== installing the nightly cron (idempotent) =="
-            CRON_LINE="17 3 * * * $DIR/backup-db.sh $TARGET_ENV >> /var/log/xverse-backup.log 2>&1"
+            CRON_LINE="17 3 * * * BACKUP_DIR=$BACKUP_DIR $DIR/backup-db.sh $TARGET_ENV >> /var/log/xverse-backup.log 2>&1"
             ( crontab -l 2>/dev/null | grep -vF "backup-db.sh $TARGET_ENV" ; echo "$CRON_LINE" ) | crontab -
             echo "cron installed:"
             crontab -l | grep "backup-db.sh $TARGET_ENV"
@@ -68,4 +74,4 @@ jobs:
             done
 
             echo "== latest backup snapshots on disk =="
-            ls -la "/opt/horizonx/backups/xverse/$TARGET_ENV/" | tail -3
+            ls -la "$BACKUP_DIR/" | tail -3

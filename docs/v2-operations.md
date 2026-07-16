@@ -32,23 +32,38 @@ container's rollback path (`rollback.sh`) available as before.
 ## Backups
 
 `scripts/backup-db.sh` takes a **transaction-safe online snapshot** (SQLite
-backup API via the running container), copies it to
-`/opt/horizonx/backups/xverse/<env>/`, and rotates after 14 days.
+backup API via the running container), copies it to `$BACKUP_DIR`, and
+rotates after 14 days.
+
+The script's documented default is the HorizonX shared path
+(`/opt/horizonx/backups/xverse/<env>/`), but that top-level directory is
+root-owned on the VPS and the deploy SSH user (a non-root account with no
+passwordless sudo) cannot create it. Until an infra admin provisions
+`/opt/horizonx/backups` with the right ownership, production backups are
+written under the product directory the deploy user already owns instead,
+via a `BACKUP_DIR` override:
+
+```
+BACKUP_DIR=/opt/horizonx/products/xverse/production/backups
+```
 
 Nightly cron on the VPS:
 
 ```cron
-17 3 * * * /opt/horizonx/products/xverse/production/backup-db.sh production >> /var/log/xverse-backup.log 2>&1
+17 3 * * * BACKUP_DIR=/opt/horizonx/products/xverse/production/backups /opt/horizonx/products/xverse/production/backup-db.sh production >> /var/log/xverse-backup.log 2>&1
 ```
 
 Run it manually before any risky change (it is also the required step
-before content migrations in later phases).
+before content migrations in later phases). Once `/opt/horizonx/backups`
+exists with correct ownership, drop the `BACKUP_DIR` override (or move the
+existing snapshots over) to rejoin the shared HorizonX layout.
 
 ## Restore
 
 1. Stop the app: `docker compose -p xverse-production -f docker-compose.yml --env-file .env down`
-2. Copy the chosen snapshot into the volume:
-   `docker run --rm -v xverse-production_xverse-data:/data -v /opt/horizonx/backups/xverse/production:/b alpine sh -c "cp /b/xverse-<STAMP>.db /data/xverse.db && rm -f /data/xverse.db-wal /data/xverse.db-shm && chown 1001:1001 /data/xverse.db"`
+2. Copy the chosen snapshot into the volume (adjust the backup path if
+   still using the `BACKUP_DIR` override above):
+   `docker run --rm -v xverse-production_xverse-data:/data -v /opt/horizonx/products/xverse/production/backups:/b alpine sh -c "cp /b/xverse-<STAMP>.db /data/xverse.db && rm -f /data/xverse.db-wal /data/xverse.db-shm && chown 1001:1001 /data/xverse.db"`
 3. Start the app again (`up -d`). Migrations re-apply idempotently.
 
 ## Schema migrations
