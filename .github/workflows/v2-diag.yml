@@ -40,7 +40,10 @@ jobs:
             dpkg -l 2>/dev/null | grep -i '^ii.*cron' || rpm -qa 2>/dev/null | grep -i cron || echo "no cron package found via dpkg/rpm"
 
             echo "== crontab -l right now =="
-            crontab -l 2>&1
+            echo "---START---"
+            crontab -l
+            EXIT=$?
+            echo "---END--- (exit code: $EXIT)"
 
             echo "== raw spool file, if readable =="
             ls -la /var/spool/cron/crontabs/ 2>&1 || ls -la /var/spool/cron/ 2>&1
