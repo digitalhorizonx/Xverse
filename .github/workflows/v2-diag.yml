@@ -1,0 +1,35 @@
+name: V2 Diag (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment: xverse-production
+    steps:
+      - name: Inspect VPS permissions
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "== whoami / groups =="
+            whoami
+            id
+
+            echo "== sudo (non-interactive) available? =="
+            sudo -n true 2>&1 && echo "sudo: yes" || echo "sudo: no"
+
+            echo "== /opt/horizonx ownership =="
+            ls -la /opt/horizonx/ 2>&1 | head -10
+
+            echo "== /opt/horizonx/backups (if it exists) =="
+            ls -la /opt/horizonx/backups/ 2>&1 | head -10
+
+            echo "== does another product already have a working backups dir? =="
+            find /opt/horizonx/backups -maxdepth 2 2>&1 | head -20
+
+            echo "== xverse product dir ownership =="
+            ls -la /opt/horizonx/products/xverse/production/ 2>&1 | head -10
