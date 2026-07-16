@@ -1,0 +1,71 @@
+name: V2 Close P0 Items (temporary)
+
+# TEMPORARY — closes the two P0 audit findings: installs the documented
+# nightly backup cron (copying backup-db.sh onto the VPS if it isn't
+# there yet, and running it once immediately to prove it actually works
+# before trusting the schedule) and removes the now-inert
+# ADMIN_BOOTSTRAP_* keys from .env. Never prints secret values. Removed
+# after use.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        default: production
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    environment: xverse-${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Encode backup script
+        id: script
+        run: echo "b64=$(base64 -w0 scripts/backup-db.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Install backup cron + clean .env, over SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          SCRIPT_B64: ${{ steps.script.outputs.b64 }}
+          TARGET_ENV: ${{ inputs.environment }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SCRIPT_B64,TARGET_ENV
+          script: |
+            set -e
+            DIR="/opt/horizonx/products/xverse/$TARGET_ENV"
+            cd "$DIR"
+
+            echo "== installing backup-db.sh =="
+            echo "$SCRIPT_B64" | base64 -d > backup-db.sh
+            chmod +x backup-db.sh
+
+            echo "== running one backup now, to prove it works =="
+            ./backup-db.sh "$TARGET_ENV"
+
+            echo "== installing the nightly cron (idempotent) =="
+            CRON_LINE="17 3 * * * $DIR/backup-db.sh $TARGET_ENV >> /var/log/xverse-backup.log 2>&1"
+            ( crontab -l 2>/dev/null | grep -vF "backup-db.sh $TARGET_ENV" ; echo "$CRON_LINE" ) | crontab -
+            echo "cron installed:"
+            crontab -l | grep "backup-db.sh $TARGET_ENV"
+
+            echo "== removing now-inert bootstrap keys from .env =="
+            STAMP=$(date +%Y%m%d-%H%M%S)
+            cp .env ".env.bak-$STAMP" && chmod 600 ".env.bak-$STAMP"
+            sed -i '/^ADMIN_BOOTSTRAP_EMAIL=/d;/^ADMIN_BOOTSTRAP_PASSWORD=/d' .env
+            chmod 600 .env
+            for KEY in ADMIN_BOOTSTRAP_EMAIL ADMIN_BOOTSTRAP_PASSWORD SESSION_SECRET DATABASE_PATH; do
+              if grep -q "^${KEY}=..*" .env 2>/dev/null; then
+                echo "$KEY: present"
+              else
+                echo "$KEY: absent"
+              fi
+            done
+
+            echo "== latest backup snapshots on disk =="
+            ls -la "/opt/horizonx/backups/xverse/$TARGET_ENV/" | tail -3
