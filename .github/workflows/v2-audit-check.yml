@@ -54,16 +54,16 @@ jobs:
             docker exec "$CN" du -sh /data 2>/dev/null || echo "(could not read)"
 
             echo "== users table row count (no PII) =="
-            docker exec "$CN" node -e "
-              const Database = require('better-sqlite3');
-              const db = new Database(process.env.DATABASE_PATH || '/data/xverse.db');
-              const u = db.prepare('SELECT COUNT(*) c FROM users').get();
-              const a = db.prepare('SELECT COUNT(*) c FROM users WHERE role=\"admin\" AND active=1').get();
-              const s = db.prepare('SELECT COUNT(*) c FROM sessions').get();
-              const sc = db.prepare('SELECT COUNT(*) c FROM showcases').get();
-              const pub = db.prepare(\"SELECT COUNT(*) c FROM showcases WHERE status='published'\").get();
-              const al = db.prepare('SELECT COUNT(*) c FROM audit_log').get();
-              console.log('users:', u.c, '| active admins:', a.c, '| live sessions:', s.c);
-              console.log('showcases:', sc.c, '| published:', pub.c);
-              console.log('audit_log entries:', al.c);
-            "
+            docker exec "$CN" node -e '
+              const Database = require("better-sqlite3");
+              const db = new Database(process.env.DATABASE_PATH || "/data/xverse.db");
+              const u = db.prepare("SELECT COUNT(*) c FROM users").get();
+              const a = db.prepare("SELECT COUNT(*) c FROM users WHERE role = ? AND active = 1").get("admin");
+              const s = db.prepare("SELECT COUNT(*) c FROM sessions").get();
+              const sc = db.prepare("SELECT COUNT(*) c FROM showcases").get();
+              const pub = db.prepare("SELECT COUNT(*) c FROM showcases WHERE status = ?").get("published");
+              const al = db.prepare("SELECT COUNT(*) c FROM audit_log").get();
+              console.log("users:", u.c, "| active admins:", a.c, "| live sessions:", s.c);
+              console.log("showcases:", sc.c, "| published:", pub.c);
+              console.log("audit_log entries:", al.c);
+            '
