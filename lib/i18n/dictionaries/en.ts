@@ -326,6 +326,9 @@ export const en = {
       errorSelf: "You cannot change your own role or deactivate yourself.",
       errorLastAdmin: "At least one active admin is required.",
       errorPasswordPolicy: "Password must be at least 12 characters.",
+      errorSelfReset:
+        "You can't reset your own password this way — it would sign you out with no way back in. Use the \"Change password\" button in the header instead.",
+      resetPasswordSelfHint: "Use \"Change password\" in the header to change your own.",
     },
 
     content: {

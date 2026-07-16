@@ -25,11 +25,15 @@ interface UserRow {
   createdAt: string;
 }
 
-const ERROR_KEYS: Record<string, "errorEmailTaken" | "errorSelf" | "errorLastAdmin" | "errorPasswordPolicy"> = {
+const ERROR_KEYS: Record<
+  string,
+  "errorEmailTaken" | "errorSelf" | "errorLastAdmin" | "errorPasswordPolicy" | "errorSelfReset"
+> = {
   email_taken: "errorEmailTaken",
   self_change: "errorSelf",
   last_admin: "errorLastAdmin",
   password_policy: "errorPasswordPolicy",
+  self_reset_forbidden: "errorSelfReset",
 };
 
 export function UsersManager({ currentUserId }: { currentUserId: string }) {
@@ -145,7 +149,12 @@ export function UsersManager({ currentUserId }: { currentUserId: string }) {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex flex-wrap gap-1.5">
-                      <AdminButton className="min-h-[34px] px-3 text-[11px]" onClick={() => void resetPassword(row)}>
+                      <AdminButton
+                        className="min-h-[34px] px-3 text-[11px]"
+                        disabled={isSelf}
+                        title={isSelf ? t.resetPasswordSelfHint : undefined}
+                        onClick={() => void resetPassword(row)}
+                      >
                         <KeyRound className="h-3 w-3" aria-hidden /> {t.resetPassword}
                       </AdminButton>
                       {row.active ? (
