@@ -12,8 +12,18 @@ import { revokeAllSessionsForUser } from "@/lib/auth/session";
  * Admin-initiated reset: the server generates a strong temporary password,
  * returns it exactly once in the response, and signs the user out
  * everywhere. Admins never choose other people's passwords.
+ *
+ * Never usable on yourself — it revokes every session for the target
+ * immediately, including the one making the request, which would lock
+ * the acting admin out with no way back in. Self-service password change
+ * (which keeps the current session alive) lives at
+ * /api/admin/account/password instead.
  */
 export const POST = adminRoute("users.manage", async (_request, auth, params) => {
+  if (params.id === auth.user.id) {
+    return NextResponse.json({ error: "self_reset_forbidden" }, { status: 400 });
+  }
+
   const db = getDb();
   const target = db.select().from(users).where(eq(users.id, params.id!)).get();
   if (!target) {

@@ -27,6 +27,7 @@ import {
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { LanguageSwitcher } from "@/components/nav/LanguageSwitcher";
 import { ThemeToggle } from "@/components/nav/ThemeToggle";
+import { ChangePasswordButton } from "./ChangePasswordButton";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/db/schema";
 import type { Dictionary } from "@/lib/i18n/types";
@@ -195,6 +196,7 @@ export function AdminChrome({ user, children }: { user: AdminUser; children: Rea
             </Link>
             <LanguageSwitcher />
             <ThemeToggle />
+            <ChangePasswordButton />
             <button
               type="button"
               onClick={signOut}

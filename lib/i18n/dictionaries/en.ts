@@ -239,6 +239,18 @@ export const en = {
       "The content management console arrives in the next phase. Authentication, roles, and the audit trail are live.",
     backToSite: "Back to the public site",
 
+    account: {
+      changePassword: "Change password",
+      currentPassword: "Current password",
+      newPassword: "New password",
+      newPasswordHint: "At least 12 characters.",
+      confirmPassword: "Confirm new password",
+      passwordsDontMatch: "The new passwords don't match.",
+      wrongCurrentPassword: "That current password is incorrect.",
+      weakPassword: "Password must be at least 12 characters.",
+      changeSuccess: "Password changed. Your other sessions have been signed out; this one stays signed in.",
+    },
+
     nav: {
       dashboard: "Dashboard",
       products: "Products",

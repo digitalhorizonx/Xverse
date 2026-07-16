@@ -228,6 +228,18 @@ export const ar: Dictionary = {
       "وحدة إدارة المحتوى تصل في المرحلة القادمة. المصادقة والأدوار وسجل التدقيق تعمل الآن.",
     backToSite: "العودة إلى الموقع العام",
 
+    account: {
+      changePassword: "تغيير كلمة المرور",
+      currentPassword: "كلمة المرور الحالية",
+      newPassword: "كلمة المرور الجديدة",
+      newPasswordHint: "١٢ حرفًا على الأقل.",
+      confirmPassword: "تأكيد كلمة المرور الجديدة",
+      passwordsDontMatch: "كلمتا المرور الجديدتان غير متطابقتين.",
+      wrongCurrentPassword: "كلمة المرور الحالية غير صحيحة.",
+      weakPassword: "يجب ألا تقل كلمة المرور عن ١٢ حرفًا.",
+      changeSuccess: "تم تغيير كلمة المرور. تم تسجيل الخروج من جلساتك الأخرى؛ هذه الجلسة تبقى مسجّلة الدخول.",
+    },
+
     nav: {
       dashboard: "لوحة التحكم",
       products: "المنتجات",
