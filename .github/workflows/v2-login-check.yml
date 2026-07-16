@@ -1,0 +1,37 @@
+name: V2 Login Check (temporary)
+
+# TEMPORARY — verifies an admin login from a GitHub runner (the sandbox
+# this assistant runs in can't reach the live domain directly). Removed
+# after use.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        default: production
+      email:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attempt login
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ]; then BASE=https://xverse.horizonx.site; else BASE=https://xverse-staging.horizonx.site; fi
+          CODE=$(curl -s -c cookies.txt -o body.json -w '%{http_code}' \
+            -H "Content-Type: application/json" -H "Origin: $BASE" \
+            -d "{\"email\":\"${{ inputs.email }}\",\"password\":\"${{ inputs.password }}\"}" \
+            "$BASE/api/admin/login")
+          echo "login status: $CODE"
+          cat body.json
+          if [ "$CODE" != "200" ]; then exit 1; fi
+          DASH=$(curl -s -b cookies.txt -o /dev/null -w '%{http_code}' "$BASE/api/admin/showcases")
+          echo "authenticated dashboard read: $DASH"
+          [ "$DASH" = "200" ]
