@@ -47,3 +47,11 @@ jobs:
 
             echo "== raw spool file, if readable =="
             ls -la /var/spool/cron/crontabs/ 2>&1 || ls -la /var/spool/cron/ 2>&1
+
+            echo "== minimal isolated crontab write/read test =="
+            echo "* * * * * /bin/true # diag-marker-8823" | crontab -
+            echo "write exit: $?"
+            echo "---READBACK-START---"
+            crontab -l
+            echo "---READBACK-END---"
+            crontab -r 2>&1 || echo "(crontab -r failed or nothing to remove)"
