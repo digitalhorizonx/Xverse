@@ -1,0 +1,164 @@
+name: V2 Provision & Verify (temporary)
+
+# TEMPORARY — one-time V2 rollout helper, removed after use (same pattern as
+# the V1 live-smoke workflow). Two manually-dispatched actions:
+#
+#   provision : converge the VPS deploy directory for V2 over the same SSH
+#               channel deploy.yml already uses — back up the current
+#               docker-compose.yml/.env, install the volume-enabled compose
+#               file, keep the existing host port, generate SESSION_SECRET
+#               on the VPS (never leaves the box), set the one-time
+#               bootstrap admin. Idempotent: existing non-empty values are
+#               never overwritten.
+#   verify    : black-box smoke of the live site from the runner (public
+#               routes, sitemap, health, admin login stack) — no secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "What to run"
+        type: choice
+        options: [provision, verify]
+        default: verify
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [staging, production]
+        default: production
+      bootstrap_email:
+        description: "provision only: first-admin email (used only if not already set)"
+        type: string
+        required: false
+      bootstrap_password:
+        description: "provision only: one-time first-admin password (rotate after first login)"
+        type: string
+        required: false
+
+concurrency:
+  group: v2-provision-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    if: inputs.action == 'provision'
+    name: Provision VPS for V2
+    runs-on: ubuntu-latest
+    environment: xverse-${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Encode compose file
+        id: compose
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            SRC=docker-compose.prod.yml
+          else
+            SRC=docker-compose.staging.yml
+          fi
+          # The VPS convention is docker-compose.yml + .env (see
+          # DEPLOYMENT.md); the repo file references .env.<environment>,
+          # so rewrite that reference before shipping it.
+          sed -E 's/\.env\.(production|staging)/.env/' "$SRC" | base64 -w0 > compose.b64
+          echo "b64=$(cat compose.b64)" >> "$GITHUB_OUTPUT"
+
+      - name: Converge deploy directory over SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          COMPOSE_B64: ${{ steps.compose.outputs.b64 }}
+          TARGET_ENV: ${{ inputs.environment }}
+          BOOTSTRAP_EMAIL: ${{ inputs.bootstrap_email }}
+          BOOTSTRAP_PASSWORD: ${{ inputs.bootstrap_password }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: COMPOSE_B64,TARGET_ENV,BOOTSTRAP_EMAIL,BOOTSTRAP_PASSWORD
+          script: |
+            set -e
+            DIR=/opt/horizonx/products/xverse/$TARGET_ENV
+            cd "$DIR"
+            STAMP=$(date +%Y%m%d-%H%M%S)
+
+            # ---- backups first, always
+            [ -f docker-compose.yml ] && cp docker-compose.yml "docker-compose.yml.bak-$STAMP"
+            [ -f .env ] && cp .env ".env.bak-$STAMP" && chmod 600 ".env.bak-$STAMP"
+            touch .env && chmod 600 .env
+
+            # ---- preserve the live host port before replacing the compose file
+            if [ "$TARGET_ENV" = "production" ]; then CN=xverse-prod; else CN=xverse-staging; fi
+            PORT=$(docker inspect "$CN" --format '{{(index (index .NetworkSettings.Ports "3000/tcp") 0).HostPort}}' 2>/dev/null || true)
+
+            # ---- install the V2 compose file (adds the xverse-data volume)
+            echo "$COMPOSE_B64" | base64 -d > docker-compose.yml
+
+            # ---- ensure required keys; never overwrite an existing non-empty value
+            ensure() {
+              KEY="$1"; VAL="$2"
+              if grep -q "^${KEY}=..*" .env; then
+                echo "kept   $KEY"
+              else
+                sed -i "/^${KEY}=/d" .env
+                printf '%s=%s\n' "$KEY" "$VAL" >> .env
+                echo "set    $KEY"
+              fi
+            }
+            ensure APP_PORT "${PORT:-3000}"
+            ensure DATABASE_PATH "/data/xverse.db"
+            ensure SESSION_SECRET "$(openssl rand -base64 48 | tr -d '\n')"
+            if [ -n "$BOOTSTRAP_EMAIL" ]; then
+              ensure ADMIN_BOOTSTRAP_EMAIL "$BOOTSTRAP_EMAIL"
+            fi
+            if [ -n "$BOOTSTRAP_PASSWORD" ]; then
+              ensure ADMIN_BOOTSTRAP_PASSWORD "$BOOTSTRAP_PASSWORD"
+            fi
+            chmod 600 .env
+            echo "provision complete: dir=$DIR port=${PORT:-3000} backups=$STAMP"
+
+  verify:
+    if: inputs.action == 'verify'
+    name: Live smoke (black-box)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test
+        run: |
+          set -u
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            BASE=https://xverse.horizonx.site
+          else
+            BASE=https://xverse-staging.horizonx.site
+          fi
+          PASS=0; FAIL=0
+          check() { # name, expected, actual
+            if [ "$2" = "$3" ]; then PASS=$((PASS+1)); echo "PASS: $1 ($3)";
+            else FAIL=$((FAIL+1)); echo "FAIL: $1 (expected $2, got $3)"; fi
+          }
+          code() { curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$@"; }
+
+          check "home"                 200 "$(code $BASE/)"
+          check "showcase index"       200 "$(code $BASE/showcase)"
+          check "showcase xability"    200 "$(code $BASE/showcase/xability)"
+          check "showcase xsite"       200 "$(code $BASE/showcase/xsite)"
+          check "showcase xapps"       200 "$(code $BASE/showcase/xapps)"
+          check "showcase xauto"       200 "$(code $BASE/showcase/xauto)"
+          check "showcase ai"          200 "$(code $BASE/showcase/ai)"
+          check "brand amber-oak"      200 "$(code $BASE/xability/amber-oak-coffee)"
+          check "alias 308"            308 "$(code $BASE/showcase/xai)"
+          check "unknown slug 404"     404 "$(code $BASE/showcase/does-not-exist)"
+          check "sitemap"              200 "$(code $BASE/sitemap.xml)"
+          URLS=$(curl -s --max-time 20 $BASE/sitemap.xml | grep -c '<url>' || true)
+          check "sitemap entries"      11  "$URLS"
+          READY=$(curl -s --max-time 20 $BASE/api/health/ready | grep -o '"database":"ok"' || true)
+          check "health ready db ok"   '"database":"ok"' "$READY"
+          check "admin login page"     200 "$(code $BASE/admin/login)"
+          # Wrong credentials must produce a clean 401 — proves the full
+          # auth stack (DB, sessions, SESSION_SECRET) is wired, without
+          # putting any real secret in this workflow.
+          LOGIN=$(code -X POST -H "Content-Type: application/json" -H "Origin: $BASE" -d '{"email":"smoke@example.com","password":"definitely-wrong-password"}' $BASE/api/admin/login)
+          check "admin auth stack 401" 401 "$LOGIN"
+          MIGRATED=$(curl -s --max-time 20 $BASE/showcase/xability | grep -o 'Everything a social media client receives' | head -1)
+          check "DB-backed content"    'Everything a social media client receives' "$MIGRATED"
+
+          echo "----------------------------------------"
+          echo "smoke: $PASS passed, $FAIL failed"
+          [ "$FAIL" = "0" ]
